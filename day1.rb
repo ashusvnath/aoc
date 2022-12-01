@@ -1,14 +1,29 @@
 require 'logger'
 logger = Logger.new(STDERR)
-
+logger.level = Logger::ERROR
+require 'optparse'
 input = nil
-if ARGV.length > 0
-    input = ARGV[0]
-else
-    logger.debug "Name of file: "
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options]"
+
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do
+    logger.level = Logger::DEBUG
+  end
+
+  opts.on("-f [FILE]", "--file [FILE_PATH]", "Path to input file ") do |file_path|
+    input = file_path
+  end
+end.parse!
+
+
+
+if input == nil
+    print "Name of file: "
     input = STDIN.gets.chomp
 end
-logger.debug "Input:" + input
+
+logger.debug "Input file:" + input
 
 
 data = File.read(input).lines.map(&:chomp)
