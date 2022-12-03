@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"os"
 	"fmt"
 	"flag"
@@ -21,9 +22,8 @@ func init() {
 	draws = make(map[string]string, 3)
 	draws["A"] = "X";	draws["B"] = "Y"; draws["C"] = "Z" 
 
-	scoring = make(map[string]int, 6)
+	scoring = make(map[string]int, 3)
 	scoring["X"] = 1; scoring["Y"] = 2; scoring["Z"] = 3;
-	scoring["A"] = 1; scoring["B"] = 2; scoring["B"] = 3;
 
 	winsAgainst = make(map[string]string, 3)
 	winsAgainst["A"] = "Z";	winsAgainst["B"] = "X"; winsAgainst["C"] = "Y" 
@@ -31,6 +31,9 @@ func init() {
 	flag.BoolVar(&verbose, "v", false, "show debug logs")
 	flag.StringVar(&filepath, "f", "day2-input.txt", "path to file")
 	flag.Parse()
+	if !verbose {
+		log.SetOutput(io.Discard)
+	}
 }
 
 func main() {
