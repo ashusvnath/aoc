@@ -19,6 +19,10 @@ func (this *_range) contains(other *_range) bool {
 	return this.start <= other.start && this.end >= other.end
 }
 
+func (this *_range) overlaps(other *_range) bool {
+	return other.start <= this.end
+}
+
 var filepath string
 var verbose bool
 
@@ -40,7 +44,8 @@ func main() {
 
 	lines := strings.Split(string(data), "\n")
 
-	overlapping := 0
+	fullOverlaps := 0
+	partialOverlaps := 0
 	rangeExp := regexp.MustCompile(`(?P<start1>\d+)-(?P<end1>\d+),(?P<start2>\d+)-(?P<end2>\d+)`)
 	var matches [][]byte
 	for idx, line := range lines {
@@ -56,12 +61,23 @@ func main() {
 		rightStart, _ := strconv.Atoi(string(matches[3]))
 		rightEnd, _ := strconv.Atoi(string(matches[4]))
 		rightRange := &_range{rightStart, rightEnd}
+
+		if rightStart < leftStart {
+			leftRange, rightRange = rightRange, leftRange
+		}
+
 		log.Printf("line(%d): %s ; Ranges: %v, %v", idx, line, leftRange, rightRange)
 
-		if leftRange.contains(rightRange) || rightRange.contains(leftRange) {
+		if leftRange.contains(rightRange) { //|| rightRange.contains(leftRange) {
 			log.Printf("Found an overlap: %v, %v", leftRange, rightRange)
-			overlapping += 1
+			fullOverlaps += 1
+			//continue
+		}
+
+		if leftRange.overlaps(rightRange) {
+			partialOverlaps += 1
 		}
 	}
-	fmt.Printf("Part 1: %d\n", overlapping)
+	fmt.Printf("Part 1: %d\n", fullOverlaps)
+	fmt.Printf("Part 2: %d\n", partialOverlaps)
 }
