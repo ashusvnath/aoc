@@ -55,12 +55,7 @@ func applyInstruction(inst _instruction, stacks map[string][]string) {
 	stacks[inst.to] = to
 }
 
-func main() {
-	part1Result := ""
-	part2Result := ""
-	data := readFile(filepath)
-	parts := strings.Split(string(data), "\n\n")
-	currentStackString := parts[0]
+func readStack(currentStackString string) (map[string][]string, []string) {
 	currentStackLines := strings.Split(currentStackString, "\n")
 	currentStackLinesLen := len(currentStackLines)
 	labelsRegexp := regexp.MustCompile(`\d+`)
@@ -88,11 +83,12 @@ func main() {
 			}
 		}
 	}
-	log.Printf("StackIds: %v\n", stackIds)
-	log.Printf("Stacks: %v\n", stacks)
+	return stacks, stackIds
+}
 
+func processInstructions(input string, stacks map[string][]string, stackIds []string) {
 	instuructionPattern := regexp.MustCompile(`move (\d+) from (\d+) to (\d+)`)
-	instructions := strings.Split(parts[1], "\n")
+	instructions := strings.Split(input, "\n")
 	for _, instruction := range instructions {
 		log.Printf("Parsing Instruction: %v", instruction)
 		matches := instuructionPattern.FindSubmatch([]byte(instruction))
@@ -103,7 +99,19 @@ func main() {
 		applyInstruction(_instruction{count, from, to}, stacks)
 		log.Printf("After apply: %v", stacks)
 	}
+}
 
+func main() {
+	part1Result := ""
+	part2Result := ""
+	data := readFile(filepath)
+	parts := strings.Split(string(data), "\n\n")
+	stacks, stackIds := readStack(parts[0])
+
+	log.Printf("StackIds: %v\n", stackIds)
+	log.Printf("Stacks: %v\n", stacks)
+
+	processInstructions(parts[1], stacks, stackIds)
 	for _, stackId := range stackIds {
 		part1Result += stacks[stackId][len(stacks[stackId])-1]
 	}
