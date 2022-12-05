@@ -34,13 +34,17 @@ func init() {
 		log.SetOutput(io.Discard)
 	}
 }
-
-func main() {
+func readFile(filepath string) ([]byte, error) {
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Printf("Could not read contents of %s : %v", filepath, err)
 		os.Exit(1)
 	}
+	return data, err
+}
+
+func main() {
+	data, _ := readFile(filepath)
 
 	lines := strings.Split(string(data), "\n")
 
