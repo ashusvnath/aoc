@@ -7,11 +7,17 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 var filepath string
 var verbose bool
+
+type _instruction struct {
+	count    int
+	from, to string
+}
 
 func init() {
 	flag.BoolVar(&verbose, "v", false, "show debug logs")
@@ -31,13 +37,30 @@ func readFile(filepath string) []byte {
 	return data
 }
 
+func applyInstruction(inst _instruction, stacks map[string][]string) {
+	//read
+	from := stacks[inst.from]
+	to := stacks[inst.to]
+
+	//transform
+	stackLen := len(from)
+	taken := from[stackLen-inst.count:]
+	from = from[0 : stackLen-inst.count]
+	for idx := len(taken) - 1; idx >= 0; idx-- {
+		to = append(to, taken[idx])
+	}
+
+	//store
+	stacks[inst.from] = from
+	stacks[inst.to] = to
+}
+
 func main() {
 	part1Result := ""
 	part2Result := ""
 	data := readFile(filepath)
 	parts := strings.Split(string(data), "\n\n")
 	currentStackString := parts[0]
-	//instructions := parts[1]
 	currentStackLines := strings.Split(currentStackString, "\n")
 	currentStackLinesLen := len(currentStackLines)
 	labelsRegexp := regexp.MustCompile(`\d+`)
@@ -68,8 +91,23 @@ func main() {
 	log.Printf("StackIds: %v\n", stackIds)
 	log.Printf("Stacks: %v\n", stacks)
 
-	//fmt.Printf("Current stack:\n%v\n\n", currentStackString)
-	//fmt.Printf("Instructions:\n%v\n", instructions)
+	instuructionPattern := regexp.MustCompile(`move (\d+) from (\d+) to (\d+)`)
+	instructions := strings.Split(parts[1], "\n")
+	for _, instruction := range instructions {
+		log.Printf("Parsing Instruction: %v", instruction)
+		matches := instuructionPattern.FindSubmatch([]byte(instruction))
+		count, _ := strconv.Atoi(string(matches[1]))
+		from := string(matches[2])
+		to := string(matches[3])
+		log.Printf("Instruction: move count:%d, from:%s , to:%s", count, from, to)
+		applyInstruction(_instruction{count, from, to}, stacks)
+		log.Printf("After apply: %v", stacks)
+	}
+
+	for _, stackId := range stackIds {
+		part1Result += stacks[stackId][len(stacks[stackId])-1]
+	}
+
 	fmt.Printf("Part 1: %s\n", part1Result)
 	fmt.Printf("Part 2: %s\n", part2Result)
 }
