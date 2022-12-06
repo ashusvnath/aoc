@@ -6,11 +6,13 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime/pprof"
 	"strings"
 )
 
 var filepath string
 var verbose bool
+var cpuprofile string
 
 type UniquePrefixDetector struct {
 	chars     map[rune][]int
@@ -69,10 +71,12 @@ func NOPaddRune(_ *UniquePrefixDetector, _ rune, _ int) {
 func init() {
 	flag.BoolVar(&verbose, "v", false, "show debug logs")
 	flag.StringVar(&filepath, "f", "day6-file.input", "path to file")
+	flag.StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
 	if !verbose {
 		log.SetOutput(io.Discard)
 	}
+
 }
 
 func readFile(filepath string) []byte {
@@ -85,6 +89,14 @@ func readFile(filepath string) []byte {
 }
 
 func main() {
+	if cpuprofile != "" {
+		f, err := os.Create(cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	data := readFile(filepath)
 	lines := strings.Split(string(data), "\n")
 	for lno, line := range lines {
