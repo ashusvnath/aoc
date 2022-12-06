@@ -6,11 +6,13 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime/pprof"
 	"strings"
 )
 
 var filepath string
 var verbose bool
+var cpuprofile *string
 
 type _instruction struct {
 	count    int
@@ -20,6 +22,7 @@ type _instruction struct {
 func init() {
 	flag.BoolVar(&verbose, "v", false, "show debug logs")
 	flag.StringVar(&filepath, "f", "day6-file.input", "path to file")
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profiling info to file")
 	flag.Parse()
 	if !verbose {
 		log.SetOutput(io.Discard)
@@ -100,9 +103,21 @@ func processLineForSOM(line string, lno int) {
 func main() {
 	data := readFile(filepath)
 	lines := strings.Split(string(data), "\n")
-	for lno, line := range lines {
-		log.Printf("line:%d, data:%s", lno, line)
-		processLineForSOP(line, lno)
-		processLineForSOM(line, lno)
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
+
+	for sampleCount := 0; sampleCount < 1000; sampleCount++ {
+		for lno, line := range lines {
+			log.Printf("line:%d, data:%s", lno, line)
+			processLineForSOP(line, lno)
+			processLineForSOM(line, lno)
+		}
+	}
+
 }
