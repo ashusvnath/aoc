@@ -12,9 +12,65 @@ import (
 var filepath string
 var verbose bool
 
-type _instruction struct {
-	count    int
-	from, to string
+type UniquePrefixDetector struct {
+	chars     map[rune][]int
+	prefixLen int
+	lastIndex int
+	seen      string
+	found     bool
+	AddRune   func(u *UniquePrefixDetector, b rune, idx int)
+}
+
+func NewUniquePrefixDetector(length int) *UniquePrefixDetector {
+	return &UniquePrefixDetector{
+		chars:     make(map[rune][]int),
+		prefixLen: length,
+		lastIndex: -1,
+		seen:      "",
+		found:     false,
+		AddRune:   addRune,
+	}
+}
+
+func addRune(u *UniquePrefixDetector, b rune, idx int) {
+	if u.found {
+		return
+	}
+	u.seen += string(b)
+	idxs, ok := u.chars[b]
+	if !ok {
+		idxs = []int{}
+	}
+	idxs = append(idxs, idx)
+	u.chars[b] = idxs
+	u.lastIndex = idx
+	processDuplicates(u)
+}
+
+func processDuplicates(u *UniquePrefixDetector) {
+	idx := u.lastIndex
+	if idx > u.prefixLen-1 {
+		charToRemove := rune(u.seen[idx-u.prefixLen])
+		log.Printf("Removing char %v at %d", charToRemove, idx)
+		foundIdxs := u.chars[charToRemove]
+		if len(foundIdxs) > 1 {
+			u.chars[charToRemove] = foundIdxs[1:]
+		} else {
+			delete(u.chars, charToRemove)
+		}
+	}
+	u.found = len(u.chars) == u.prefixLen
+	if u.found {
+		u.AddRune = NOPaddRune
+	}
+}
+
+func (u *UniquePrefixDetector) Found() bool {
+	return u.found
+}
+
+func NOPaddRune(_ *UniquePrefixDetector, _ rune, _ int) {
+	return
 }
 
 func init() {
@@ -35,74 +91,21 @@ func readFile(filepath string) []byte {
 	return data
 }
 
-func processLineForSOP(line string, lno int) {
-	sopChars := make(map[rune][]int)
-	for idx, b := range line {
-
-		idxs, ok := sopChars[b]
-		if !ok {
-			idxs = []int{}
-		}
-		idxs = append(idxs, idx)
-		sopChars[b] = idxs
-
-		if idx > 3 {
-			charToRemove := rune(line[idx-4])
-			log.Printf("Removing char %v at %d", charToRemove, idx)
-			foundSop := sopChars[charToRemove]
-			if len(foundSop) > 1 {
-				sopChars[charToRemove] = foundSop[1:]
-			} else {
-				delete(sopChars, charToRemove)
-			}
-		}
-
-		log.Printf("line: %d, SOP chars:%v", lno, sopChars)
-
-		if len(sopChars) == 4 {
-			log.Printf("line: %d, found 4 keys at idx: %d (%v)", lno, idx, sopChars)
-			fmt.Printf("line: %d, first loc of 4 non-repeating chars: %d\n", lno, idx+1)
-			break
-		}
-	}
-}
-
-func processLineForSOM(line string, lno int) {
-	somChars := make(map[rune][]int)
-	for idx, b := range line {
-		idxs, ok := somChars[b]
-		if !ok {
-			idxs = []int{}
-		}
-		idxs = append(idxs, idx)
-		somChars[b] = idxs
-		if idx > 13 {
-			charToRemove := rune(line[idx-14])
-			log.Printf("Removing char %v at %d", charToRemove, idx)
-			foundSom := somChars[charToRemove]
-			if len(foundSom) > 1 {
-				somChars[charToRemove] = foundSom[1:]
-			} else {
-				delete(somChars, charToRemove)
-			}
-		}
-		log.Printf("line: %d, SOM chars: %v", lno, somChars)
-
-		if len(somChars) == 14 {
-			log.Printf("line: %d, found 14 keys at idx: %d (%v)", lno, idx, somChars)
-			fmt.Printf("line: %d, first loc of 14 non-repeating chars: %d\n", lno, idx+1)
-			break
-		}
-
-	}
-}
-
 func main() {
 	data := readFile(filepath)
 	lines := strings.Split(string(data), "\n")
 	for lno, line := range lines {
+		prefix4 := NewUniquePrefixDetector(4)
+		prefix14 := NewUniquePrefixDetector(14)
+		for idx, b := range line {
+			prefix4.AddRune(prefix4, b, idx)
+			prefix14.AddRune(prefix14, b, idx)
+			if prefix4.Found() && prefix14.Found() {
+				break
+			}
+		}
+		fmt.Printf("line: %d, first loc of 4 non-repeating chars: %d\n", lno, prefix4.lastIndex+1)
+		fmt.Printf("line: %d, first loc of 14 non-repeating chars: %d\n", lno, prefix14.lastIndex+1)
 		log.Printf("line:%d, data:%s", lno, line)
-		processLineForSOP(line, lno)
-		processLineForSOM(line, lno)
 	}
 }
