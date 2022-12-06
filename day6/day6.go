@@ -88,17 +88,17 @@ func main() {
 	data := readFile(filepath)
 	lines := strings.Split(string(data), "\n")
 	for lno, line := range lines {
-		prefix4 := NewUniquePrefixDetector(4)
-		prefix14 := NewUniquePrefixDetector(14)
+		prefix4Detector := NewUniquePrefixDetector(4)
+		prefix14Detector := NewUniquePrefixDetector(14)
 		for idx, b := range line {
-			prefix4.AddRune(prefix4, b, idx)
-			prefix14.AddRune(prefix14, b, idx)
-			if prefix4.Found && prefix14.Found {
+			prefix4Detector.AddRune(prefix4Detector, b, idx)
+			prefix14Detector.AddRune(prefix14Detector, b, idx)
+			if prefix4Detector.Found && prefix14Detector.Found {
 				break
 			}
 		}
-		fmt.Printf("line: %d, first loc of 4 non-repeating chars: %d\n", lno, prefix4.lastIndex+1)
-		fmt.Printf("line: %d, first loc of 14 non-repeating chars: %d\n", lno, prefix14.lastIndex+1)
+		fmt.Printf("line: %d, first loc of 4 non-repeating chars: %d\n", lno, prefix4Detector.lastIndex+1)
+		fmt.Printf("line: %d, first loc of 14 non-repeating chars: %d\n", lno, prefix14Detector.lastIndex+1)
 		log.Printf("line:%d, data:%s", lno, line)
 	}
 }
