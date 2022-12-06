@@ -17,7 +17,7 @@ type UniquePrefixDetector struct {
 	prefixLen int
 	lastIndex int
 	seen      string
-	found     bool
+	Found     bool
 	AddRune   func(u *UniquePrefixDetector, b rune, idx int)
 }
 
@@ -27,15 +27,12 @@ func NewUniquePrefixDetector(length int) *UniquePrefixDetector {
 		prefixLen: length,
 		lastIndex: -1,
 		seen:      "",
-		found:     false,
+		Found:     false,
 		AddRune:   addRune,
 	}
 }
 
 func addRune(u *UniquePrefixDetector, b rune, idx int) {
-	if u.found {
-		return
-	}
 	u.seen += string(b)
 	idxs, ok := u.chars[b]
 	if !ok {
@@ -59,14 +56,10 @@ func processDuplicates(u *UniquePrefixDetector) {
 			delete(u.chars, charToRemove)
 		}
 	}
-	u.found = len(u.chars) == u.prefixLen
-	if u.found {
+	u.Found = len(u.chars) == u.prefixLen
+	if u.Found {
 		u.AddRune = NOPaddRune
 	}
-}
-
-func (u *UniquePrefixDetector) Found() bool {
-	return u.found
 }
 
 func NOPaddRune(_ *UniquePrefixDetector, _ rune, _ int) {
@@ -100,7 +93,7 @@ func main() {
 		for idx, b := range line {
 			prefix4.AddRune(prefix4, b, idx)
 			prefix14.AddRune(prefix14, b, idx)
-			if prefix4.Found() && prefix14.Found() {
+			if prefix4.Found && prefix14.Found {
 				break
 			}
 		}
