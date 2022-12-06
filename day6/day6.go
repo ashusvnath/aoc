@@ -89,6 +89,7 @@ func readFile(filepath string) []byte {
 }
 
 func main() {
+	data := readFile(filepath)
 	if cpuprofile != "" {
 		f, err := os.Create(cpuprofile)
 		if err != nil {
@@ -97,20 +98,22 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	data := readFile(filepath)
-	lines := strings.Split(string(data), "\n")
-	for lno, line := range lines {
-		prefix4Detector := NewUniquePrefixDetector(4)
-		prefix14Detector := NewUniquePrefixDetector(14)
-		for idx, b := range line {
-			prefix4Detector.AddRune(prefix4Detector, b, idx)
-			prefix14Detector.AddRune(prefix14Detector, b, idx)
-			if prefix4Detector.Found && prefix14Detector.Found {
-				break
+
+	for sampleCount := 0; sampleCount < 1000; sampleCount++ {
+		lines := strings.Split(string(data), "\n")
+		for lno, line := range lines {
+			prefix4Detector := NewUniquePrefixDetector(4)
+			prefix14Detector := NewUniquePrefixDetector(14)
+			for idx, b := range line {
+				prefix4Detector.AddRune(prefix4Detector, b, idx)
+				prefix14Detector.AddRune(prefix14Detector, b, idx)
+				if prefix4Detector.Found && prefix14Detector.Found {
+					break
+				}
 			}
+			fmt.Printf("line: %d, first loc of 4 non-repeating chars: %d\n", lno, prefix4Detector.lastIndex+1)
+			fmt.Printf("line: %d, first loc of 14 non-repeating chars: %d\n", lno, prefix14Detector.lastIndex+1)
+			log.Printf("line:%d, data:%s", lno, line)
 		}
-		fmt.Printf("line: %d, first loc of 4 non-repeating chars: %d\n", lno, prefix4Detector.lastIndex+1)
-		fmt.Printf("line: %d, first loc of 14 non-repeating chars: %d\n", lno, prefix14Detector.lastIndex+1)
-		log.Printf("line:%d, data:%s", lno, line)
 	}
 }
