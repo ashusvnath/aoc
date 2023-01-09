@@ -55,18 +55,34 @@ func main() {
 
 	fmt.Printf("Known dirs: %d\n", len(knownDirs))
 	GenerateListing(rootDir, 0)
-	fmt.Printf("Part1: %d\n", Part1())
+	fmt.Printf("Part1: %d\n", Part1(knownDirs))
+	fmt.Printf("Part2: %d\n", Part2(rootDir, knownDirs))
 }
 
-func Part1() int {
+func Part1(knownDirs []*AOCDir) int {
 	limit := 100000
 	total := 0
-	for name, dir := range knownDirs {
+	for _, dir := range knownDirs {
 		size := dir.Size()
 		if size <= limit {
 			total += size
-			log.Printf("Dir: %#v, Size : %#v, Running total: %#v\n", name, size, total)
+			log.Printf("Dir: %#v, Size : %#v, Running total: %#v\n", dir.name, size, total)
 		}
 	}
 	return total
+}
+
+func Part2(rootDir *AOCDir, knownDirs []*AOCDir) int {
+	totalDiskSize := 70000000
+	requiredSpace := 30000000
+	currentFree := totalDiskSize - rootDir.Size()
+
+	minCleanupSize := requiredSpace - currentFree
+	var smallestEligible *AOCDir = rootDir
+	for _, dir := range knownDirs {
+		if dir.Size() >= minCleanupSize && smallestEligible.Size() > dir.Size() {
+			smallestEligible = dir
+		}
+	}
+	return smallestEligible.size
 }
