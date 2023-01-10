@@ -14,7 +14,7 @@ var cpuprofile string
 
 func init() {
 	flag.BoolVar(&verbose, "v", false, "show debug logs")
-	flag.StringVar(&filepath, "f", "day6-file.input", "path to file")
+	flag.StringVar(&filepath, "f", "test.txt", "path to file")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
 	if !verbose {

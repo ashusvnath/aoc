@@ -16,5 +16,5 @@ build : *.go
 
 tests : build
 	@echo Running against test input
-	./$(NAME).out -f *test.input -v
+	./$(NAME).out -f test.txt -v
 	@echo DONE
