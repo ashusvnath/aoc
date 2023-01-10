@@ -1,3 +1,3 @@
-module day7
+module day8
 
 go 1.18
