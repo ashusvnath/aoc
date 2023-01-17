@@ -17,6 +17,7 @@ import (
 var filepath string
 var verbose bool
 var cpuprofile string
+var commandRegexp *regexp.Regexp
 
 var moveDelta = map[string]complex128{
 	"R": 1,
@@ -85,6 +86,10 @@ func readFile(filepath string) []byte {
 	return data
 }
 
+func init() {
+	commandRegexp = regexp.MustCompile(`^([RULD]) (\d+)`)
+}
+
 func main() {
 	data := readFile(filepath)
 	if cpuprofile != "" {
@@ -98,7 +103,10 @@ func main() {
 	log.Printf("Input: \n%v\n", string(data))
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
 	rope := NewRope()
-	commandRegexp := regexp.MustCompile(`^([RULD]) (\d+)`)
+	fmt.Printf("Part1: %d\n", Part1(lines, rope))
+}
+
+func Part1(lines []string, rope *Rope) int {
 	for _, line := range lines {
 		result := commandRegexp.FindSubmatch([]byte(line))
 		if result == nil {
@@ -109,5 +117,5 @@ func main() {
 		log.Printf("Direction: %s, count: %v", direction, count)
 		rope.Move(direction, count)
 	}
-	fmt.Printf("Part1: %d\n", rope.CountDistinctTailPositions())
+	return rope.CountDistinctTailPositions()
 }
