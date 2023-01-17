@@ -152,7 +152,7 @@ func scenicScore(idx int, mat [][]int) (int, [4]int) {
 	x, y := idx/l, idx%l
 	h := mat[x][y]
 	checkRight, checkUp, checkLeft, checkDown := true, true, true, true
-	rightScore, upScore, leftScore, downScore := 1, 1, 1, 1
+	rightScore, upScore, leftScore, downScore := l-y-1, x, y, l-x-1
 	for i := 1; i < l && (checkLeft || checkDown || checkRight || checkUp); i++ {
 		if checkDown && x+i < l && mat[x+i][y] >= h {
 			downScore = i
@@ -170,18 +170,6 @@ func scenicScore(idx int, mat [][]int) (int, [4]int) {
 			leftScore = i
 			checkLeft = false
 		}
-	}
-	if checkLeft {
-		leftScore = y
-	}
-	if checkRight {
-		rightScore = l - y - 1
-	}
-	if checkUp {
-		upScore = x
-	}
-	if checkDown {
-		downScore = l - x - 1
 	}
 	score := leftScore * rightScore * upScore * downScore
 	return score, [4]int{upScore, leftScore, rightScore, downScore}
