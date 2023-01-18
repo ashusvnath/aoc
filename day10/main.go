@@ -2,10 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"runtime/pprof"
+	"strings"
 )
 
 var filepath string
@@ -42,5 +44,10 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	log.Printf("Data: %v", string(data))
+	log.Printf("Data: \n%v\n", string(data))
+	cpu := NewCPU()
+	cpu.RecordRegsiterValueAtCycle(20, 60, 100, 140, 180, 220)
+	cpu.Execute(strings.Split(strings.TrimRight(string(data), "\n"), "\n"))
+	log.Printf("CPU Recorded values: %#v\n", cpu.recordedValues)
+	fmt.Printf("Part1: %v\n", Part1(cpu))
 }
