@@ -52,11 +52,20 @@ func main() {
 	}
 	log.Printf("Input: \n%v\n", string(data))
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
-	rope := NewRope(2)
-	fmt.Printf("Part1: %d\n", Part1(lines, rope))
+	rope := NewRope(10)
+	node2Positions := NewRecorder()
+	node10Positions := NewRecorder()
+
+	rope.RegisterRecorderByKnotIdx(node2Positions.Record, 2)
+	rope.RegisterRecorderByKnotIdx(node10Positions.Record, 10)
+	log.Printf("Position: %#v\n", rope)
+	Execute(lines, rope)
+
+	fmt.Printf("Part1: %d\n", node2Positions.Count())
+	fmt.Printf("Part2: %d\n", node10Positions.Count())
 }
 
-func Part1(lines []string, rope *Rope) int {
+func Execute(lines []string, rope *Rope) {
 	for _, line := range lines {
 		result := commandRegexp.FindSubmatch([]byte(line))
 		if result == nil {
@@ -64,8 +73,7 @@ func Part1(lines []string, rope *Rope) int {
 		}
 		direction := string(result[1])
 		count, _ := strconv.Atoi(string(result[2]))
-		log.Printf("Direction: %s, count: %v", direction, count)
+		log.Printf("Execute: Direction: %s, count: %v", direction, count)
 		rope.Move(direction, count)
 	}
-	return len(rope.tailPositions)
 }

@@ -2,39 +2,28 @@ package main
 
 import "log"
 
-var moveDelta = map[string]complex128{
-	"R": 1,
-	"L": -1,
-	"U": 1i,
-	"D": -1i,
-}
-
 type Rope struct {
-	head          *Knot
-	tailPositions Set[complex128]
+	allKnots map[int]*Knot
 }
 
 func (r *Rope) Move(direction string, count int) {
-	r.head.Move(direction, count)
+	log.Printf("Rope: Moving: %v, %v", direction, count)
+	r.allKnots[1].Move(direction, count)
 }
 
-func (r *Rope) Record(tailKnot *Knot) {
-	log.Printf("Tail moved to : %v", tailKnot.position)
-	r.tailPositions.Add(tailKnot.position)
+func (r *Rope) RegisterRecorderByKnotIdx(recorder Notifiable[*Knot], knotNumber int) {
+	knotToFollow := r.allKnots[knotNumber]
+	knotToFollow.Register(recorder)
 }
 
 func NewRope(numKnots int) *Rope {
-	positions := make(Set[complex128])
-	positions.Add(0)
-	tail := NewKnot()
-	prev := tail
-	var head *Knot
-	for i := 1; i < numKnots; i++ {
-		head = NewKnot()
-		head.Register(prev.Follow)
-		prev = head
+	allKnots := make(map[int]*Knot)
+	allKnots[1] = NewKnot(1)
+	for i := 2; i <= numKnots; i++ {
+		allKnots[i] = NewKnot(i)
+		allKnots[i-1].Register(allKnots[i].Follow)
+
 	}
-	rope := &Rope{head, positions}
-	tail.Register(rope.Record)
+	rope := &Rope{allKnots}
 	return rope
 }
