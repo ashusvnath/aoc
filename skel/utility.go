@@ -20,3 +20,10 @@ func (s *Set[T]) AsSlice() []T {
 	}
 	return result
 }
+
+type Notifiable[T any] func(T)
+
+type Observable[T any] interface {
+	Register(Notifiable[T])
+	Notify()
+}
