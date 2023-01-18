@@ -45,9 +45,12 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	log.Printf("Data: \n%v\n", string(data))
-	cpu := NewCPU()
-	cpu.RecordRegsiterValueAtCycle(20, 60, 100, 140, 180, 220)
+	cpu := NewCPU(NewClock())
+	part1 := NewRecorder("part1", 20, 40)
+	part2 := NewScreen(6, 40, '#', '.')
+	cpu.Register(part1)
+	cpu.Register(part2)
 	cpu.Execute(strings.Split(strings.TrimRight(string(data), "\n"), "\n"))
-	log.Printf("CPU Recorded values: %#v\n", cpu.recordedValues)
-	fmt.Printf("Part1: %v\n", Part1(cpu))
+	fmt.Printf("Part1: %v\n", part1.Report())
+	fmt.Printf("Part2: \n%v", part2.Report())
 }

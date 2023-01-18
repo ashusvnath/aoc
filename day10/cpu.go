@@ -1,10 +1,14 @@
 package main
 
 import (
-	"log"
 	"regexp"
 	"strconv"
 )
+
+type CPURecord interface {
+	Cycle() int
+	RegisterX() int
+}
 
 var addInstRegex *regexp.Regexp
 
@@ -13,17 +17,22 @@ func init() {
 }
 
 type CPU struct {
-	X              int
-	recordedValues map[uint]int
-	recordAt       Set[uint]
-	cycle          uint
+	x     int
+	clock *Clock
+	o     *Observable[CPURecord]
 }
 
 func (c *CPU) Tick() {
-	c.cycle += 1
-	if c.recordAt.Contains(c.cycle) {
-		c.recordedValues[c.cycle] = c.X
-	}
+	c.clock.Tick()
+	c.o.Notify()
+}
+
+func (c *CPU) Cycle() int {
+	return c.clock.cycle
+}
+
+func (c *CPU) RegisterX() int {
+	return c.x
 }
 
 func (c *CPU) Execute(instructions []string) {
@@ -34,7 +43,7 @@ func (c *CPU) Execute(instructions []string) {
 			c.Tick()
 			submatches := addInstRegex.FindSubmatch([]byte(instruction))
 			op, _ := strconv.Atoi(string(submatches[1]))
-			c.X += op
+			c.x += op
 
 		case instruction == "noop":
 			c.Tick()
@@ -42,22 +51,13 @@ func (c *CPU) Execute(instructions []string) {
 	}
 }
 
-func (c *CPU) RecordRegsiterValueAtCycle(cycle ...uint) {
-	for _, cycleIdx := range cycle {
-		c.recordAt.Add(cycleIdx)
-	}
+func (c *CPU) Register(r Recorder) {
+	c.o.Register(r.Record)
 }
 
-func NewCPU() *CPU {
-	return &CPU{1, make(map[uint]int), make(Set[uint]), 0}
-}
-
-func Part1(cpu *CPU) int {
-	result := 0
-	for cycle, value := range cpu.recordedValues {
-		diff := int(cycle) * value
-		result += diff
-		log.Printf("cycle: %3d , value: %3d, diff: %10v, cumulative:%10v", cycle, value, diff, result)
-	}
-	return result
+func NewCPU(clk *Clock) *CPU {
+	cpu := &CPU{1, clk, nil}
+	obs := &Observable[CPURecord]{cpu, nil}
+	cpu.o = obs
+	return cpu
 }
