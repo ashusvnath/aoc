@@ -23,7 +23,17 @@ func (s *Set[T]) AsSlice() []T {
 
 type Notifiable[T any] func(T)
 
-type Observable[T any] interface {
-	Register(Notifiable[T])
-	Notify()
+type Observable[T any] struct {
+	observed  T
+	observers []Notifiable[T]
+}
+
+func (o *Observable[T]) Register(n Notifiable[T]) {
+	o.observers = append(o.observers, n)
+}
+
+func (o *Observable[T]) Notify() {
+	for _, notify := range o.observers {
+		notify(o.observed)
+	}
 }
