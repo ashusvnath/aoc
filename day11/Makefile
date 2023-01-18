@@ -9,7 +9,12 @@ clean:
 	@rm -f $(NAME).out
 	@echo DONE
 
-build : *.go
+unit:
+	@echo Ruinning unit tests
+	@go test -v
+	@echo DONE
+
+build : *.go unit
 	@echo Building
 	@go build -o $(NAME).out ./...
 	@echo DONE
