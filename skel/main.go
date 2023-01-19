@@ -16,11 +16,6 @@ func init() {
 	flag.BoolVar(&verbose, "v", false, "show debug logs")
 	flag.StringVar(&filepath, "f", "test.txt", "path to file")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "write cpu profile to file")
-	flag.Parse()
-	if !verbose {
-		log.SetOutput(io.Discard)
-	}
-
 }
 
 func readFile(filepath string) []byte {
@@ -33,6 +28,11 @@ func readFile(filepath string) []byte {
 }
 
 func main() {
+	flag.Parse()
+	if !verbose {
+		log.SetOutput(io.Discard)
+	}
+
 	data := readFile(filepath)
 	if cpuprofile != "" {
 		f, err := os.Create(cpuprofile)
