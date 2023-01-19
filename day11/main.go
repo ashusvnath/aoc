@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -41,5 +42,18 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
+
 	log.Printf("Data: %v", string(data))
+	ms := NewMonkeyService()
+	ms.Setup(string(data))
+	fmt.Printf("Part1: %v\n", Part1(ms))
+}
+
+func Part1(ms *MonkeyService) int {
+	ms.DoBusiness(20)
+	monkeys := ms.MonkeysByActivity()
+	log.Printf("ids sorted by activity : %v", monkeys)
+	repo = GetMonkeyRepository()
+	result := monkeys[0].Activity() * monkeys[1].Activity()
+	return result
 }

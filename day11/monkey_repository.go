@@ -3,12 +3,14 @@ package main
 import "log"
 
 type MonkeyRepository struct {
+	monkeyIds    []string
 	knownMonkeys map[string]*Monkey
 }
 
 var repo *MonkeyRepository = newMonkeyRepository()
 
 func (mr *MonkeyRepository) Add(m *Monkey) {
+	mr.monkeyIds = append(mr.monkeyIds, m.id)
 	mr.knownMonkeys[m.id] = m
 }
 
@@ -16,8 +18,15 @@ func (mr *MonkeyRepository) Get(id string) *Monkey {
 	return mr.knownMonkeys[id]
 }
 
+func (mr *MonkeyRepository) AllMonkeyIds() []string {
+	return mr.monkeyIds
+}
+
 func newMonkeyRepository() *MonkeyRepository {
-	return &MonkeyRepository{make(map[string]*Monkey)}
+	return &MonkeyRepository{
+		monkeyIds:    []string{},
+		knownMonkeys: make(map[string]*Monkey),
+	}
 }
 func GetMonkeyRepository() *MonkeyRepository {
 	return repo

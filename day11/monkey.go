@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 type Monkey struct {
 	id        string
@@ -11,6 +14,7 @@ type Monkey struct {
 }
 
 func (m *Monkey) DoBusiness() {
+	log.Printf("Monkey%s: Doing business", m.id)
 	for _, item := range m.items {
 		m.action(Divide(3)(m.op(item)))
 		m.processed = append(m.processed, item)
@@ -25,6 +29,14 @@ func (m *Monkey) AddItem(n int) {
 
 func (m *Monkey) Activity() int {
 	return len(m.processed)
+}
+
+func (m *Monkey) GoString() string {
+	return fmt.Sprintf("Monkey%s(activity: %v)", m.id, m.Activity()) //, m.processed
+}
+
+func (m *Monkey) String() string {
+	return fmt.Sprintf("Monkey%s(activity: %v)", m.id, m.Activity()) //, m.processed
 }
 
 func NewMonkeyBuilder() *MonkeyBuilder {
