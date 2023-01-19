@@ -42,5 +42,5 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	log.Printf("Data: %v", string(data))
+	log.Printf("Data:\n%v", string(data))
 }
