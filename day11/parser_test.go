@@ -36,8 +36,11 @@ func TestParse(t *testing.T) {
 	Test: divisible by 23
 	  If true: throw to monkey 2
 	  If false: throw to monkey 3`
-	NewParser().Parse(input)
-	monkey0 := __getAllMonkeys()["0"]
+	monkey0 := NewParser().Parse(input)
+
+	repo.Add(monkey0)
+	repo.Add(monkey2)
+	repo.Add(monkey3)
 
 	assertEqual(79, monkey0.items[0], t)
 	assertEqual(69, monkey0.items[1], t)

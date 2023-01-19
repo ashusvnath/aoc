@@ -17,6 +17,10 @@ func TestMonkey(t *testing.T) {
 			Items(21, 36).
 			Build()
 
+		repo.Add(m1)
+		repo.Add(m2)
+		repo.Add(m3)
+
 		m3.DoBusiness()
 		assertEqual(2, m3.Activity(), t)
 		assertEqual(0, len(m3.items), t)

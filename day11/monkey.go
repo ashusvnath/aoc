@@ -2,18 +2,6 @@ package main
 
 import "log"
 
-func init() {
-	if __allMonkeys == nil {
-		__allMonkeys = make(map[string]*Monkey)
-	}
-}
-
-var __allMonkeys map[string]*Monkey
-
-func __getAllMonkeys() map[string]*Monkey {
-	return __allMonkeys
-}
-
 type Monkey struct {
 	id        string
 	op        Operation
@@ -37,18 +25,6 @@ func (m *Monkey) AddItem(n int) {
 
 func (m *Monkey) Activity() int {
 	return len(m.processed)
-}
-
-func ThrowTo(monkeyId string) Action {
-	return func(in int) {
-		monkey := __getAllMonkeys()[monkeyId]
-		if monkey != nil {
-			monkey.AddItem(in)
-			return
-		}
-		log.Printf("AllMonkeys : %#v", __getAllMonkeys())
-		log.Fatalf("Monkey with id %s not found", monkeyId)
-	}
 }
 
 func NewMonkeyBuilder() *MonkeyBuilder {

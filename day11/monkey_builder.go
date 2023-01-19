@@ -42,7 +42,6 @@ func (mb *MonkeyBuilder) WhenFalse(a Action) *MonkeyBuilder {
 
 func (mb *MonkeyBuilder) Build() *Monkey {
 	mb.monkey.action = mb.cb.Build()
-	__allMonkeys[mb.monkey.id] = mb.monkey
 	return mb.monkey
 }
 

@@ -23,7 +23,7 @@ func NewParser() *Parser {
 	return &Parser{nil}
 }
 
-func (p *Parser) Parse(monkeyObservationDataLines string) {
+func (p *Parser) Parse(monkeyObservationDataLines string) *Monkey {
 	lines := strings.Split(monkeyObservationDataLines, "\n")
 	p.currentMonkeyBuilder = NewMonkeyBuilder()
 	for _, line := range lines {
@@ -59,7 +59,7 @@ func (p *Parser) Parse(monkeyObservationDataLines string) {
 			}
 		}
 	}
-	p.currentMonkeyBuilder.Build()
+	return p.currentMonkeyBuilder.Build()
 }
 
 func ParseOperation(input []string) Operation {
