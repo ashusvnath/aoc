@@ -11,14 +11,20 @@ var (
 	monkeyLineRegex = regexp.MustCompile(`^Monkey (\d+):$`)
 	itemsLineRegex  = regexp.MustCompile(`^\s+Starting items: (\d+(,\s\d+)*)$`)
 	operationRegex  = regexp.MustCompile(`^\s+Operation: (new = old ([+*]) (old|\d+))$`)
+	testLineRegex   = regexp.MustCompile(`^\s+Test: divisible by (\d+)$`)
+	actionLineRegex = regexp.MustCompile(`^\s+If (true|false): throw to monkey (\d+)$`)
 )
 
 type Parser struct {
 	currentMonkeyBuilder *MonkeyBuilder
 }
 
-func (p *Parser) Parse(monkeyLines string) {
-	lines := strings.Split(monkeyLines, "\n")
+func NewParser() *Parser {
+	return &Parser{nil}
+}
+
+func (p *Parser) Parse(monkeyObservationDataLines string) {
+	lines := strings.Split(monkeyObservationDataLines, "\n")
 	p.currentMonkeyBuilder = NewMonkeyBuilder()
 	for _, line := range lines {
 		switch {
@@ -37,9 +43,23 @@ func (p *Parser) Parse(monkeyLines string) {
 			operationStrings := operationRegex.FindStringSubmatch(line)
 			operation := ParseOperation(operationStrings)
 			p.currentMonkeyBuilder.Op(operation)
+		case testLineRegex.MatchString(line):
+			testStrings := testLineRegex.FindStringSubmatch(line)
+			divisor, _ := strconv.Atoi(testStrings[1])
+			test := DivisibleBy(divisor)
+			p.currentMonkeyBuilder.Test(test)
+		case actionLineRegex.MatchString(line):
+			actionStrings := actionLineRegex.FindStringSubmatch(line)
+			condition := actionStrings[1]
+			action := ThrowTo(actionStrings[2])
+			if condition == "true" {
+				p.currentMonkeyBuilder.WhenTrue(action)
+			} else {
+				p.currentMonkeyBuilder.WhenFalse(action)
+			}
 		}
-
 	}
+	p.currentMonkeyBuilder.Build()
 }
 
 func ParseOperation(input []string) Operation {

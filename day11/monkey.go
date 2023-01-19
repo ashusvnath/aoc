@@ -22,35 +22,6 @@ type Monkey struct {
 	processed []int
 }
 
-type MonkeyBuilder struct {
-	monkey *Monkey
-}
-
-func (mb *MonkeyBuilder) Id(id string) *MonkeyBuilder {
-	mb.monkey.id = id
-	return mb
-}
-
-func (mb *MonkeyBuilder) Op(op Operation) *MonkeyBuilder {
-	mb.monkey.op = op
-	return mb
-}
-
-func (mb *MonkeyBuilder) Action(action Action) *MonkeyBuilder {
-	mb.monkey.action = action
-	return mb
-}
-
-func (mb *MonkeyBuilder) Items(items ...int) *MonkeyBuilder {
-	mb.monkey.items = items
-	return mb
-}
-
-func (m MonkeyBuilder) Build() *Monkey {
-	__allMonkeys[m.monkey.id] = m.monkey
-	return m.monkey
-}
-
 func (m *Monkey) DoBusiness() {
 	for _, item := range m.items {
 		m.action(Divide(3)(m.op(item)))
@@ -81,5 +52,8 @@ func ThrowTo(monkeyId string) Action {
 }
 
 func NewMonkeyBuilder() *MonkeyBuilder {
-	return &MonkeyBuilder{&Monkey{"unassigned", nil, nil, nil, nil}}
+	return &MonkeyBuilder{
+		monkey: &Monkey{"unassigned", nil, nil, nil, nil},
+		cb:     &ConditionalBuilder{nil, nil, nil},
+	}
 }

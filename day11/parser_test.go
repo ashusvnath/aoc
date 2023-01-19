@@ -26,3 +26,24 @@ func TestParseOperation(t *testing.T) {
 		assertEqual(81, operation(9), t)
 	})
 }
+
+func TestParse(t *testing.T) {
+	monkey2 := NewMonkeyBuilder().Id("2").Build()
+	monkey3 := NewMonkeyBuilder().Id("3").Build()
+	input := `Monkey 0:
+	Starting items: 79, 69
+	Operation: new = old * 19
+	Test: divisible by 23
+	  If true: throw to monkey 2
+	  If false: throw to monkey 3`
+	NewParser().Parse(input)
+	monkey0 := __getAllMonkeys()["0"]
+
+	assertEqual(79, monkey0.items[0], t)
+	assertEqual(69, monkey0.items[1], t)
+	assertEqual(38, monkey0.op(2), t)
+
+	monkey0.DoBusiness()
+	assertEqual(500, monkey3.items[0], t)
+	assertEqual(437, monkey2.items[0], t)
+}
