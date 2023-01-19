@@ -1,17 +1,20 @@
 package main
 
-import "log"
+import (
+	"log"
+	"math/big"
+)
 
 type MonkeyRepository struct {
 	monkeyIds    []string
 	knownMonkeys map[string]*Monkey
+	modulo       *big.Int
 }
-
-var repo *MonkeyRepository = newMonkeyRepository()
 
 func (mr *MonkeyRepository) Add(m *Monkey) {
 	mr.monkeyIds = append(mr.monkeyIds, m.id)
 	mr.knownMonkeys[m.id] = m
+	mr.modulo.Mul(mr.modulo, m.divisor)
 }
 
 func (mr *MonkeyRepository) Get(id string) *Monkey {
@@ -26,20 +29,25 @@ func newMonkeyRepository() *MonkeyRepository {
 	return &MonkeyRepository{
 		monkeyIds:    []string{},
 		knownMonkeys: make(map[string]*Monkey),
+		modulo:       big.NewInt(1),
 	}
 }
 func GetMonkeyRepository() *MonkeyRepository {
-	return repo
+	return newMonkeyRepository()
 }
 
-func ThrowTo(monkeyId string) Action {
-	return func(in int) {
-		monkey := repo.Get(monkeyId)
+func (mr *MonkeyRepository) ThrowTo(monkeyId string) Action {
+	return func(in *big.Int) {
+		if in.Cmp(mr.modulo) == 1 {
+			_, m := in.DivMod(in, mr.modulo, big.NewInt(0))
+			in = m
+		}
+		monkey := mr.Get(monkeyId)
 		if monkey != nil {
 			monkey.AddItem(in)
 			return
 		}
-		log.Printf("AllMonkeys : %#v", repo)
+		log.Printf("AllMonkeys : %#v", mr)
 		log.Fatalf("Monkey with id %s not found", monkeyId)
 	}
 }

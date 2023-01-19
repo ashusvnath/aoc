@@ -1,43 +1,54 @@
 package main
 
-type Operation func(int) int
+import (
+	"math/big"
+)
 
-func Add(n int) Operation {
-	return func(inp int) int {
-		return inp + n
+type Operation func(*big.Int) *big.Int
+
+func Add(n *big.Int) Operation {
+	return func(inp *big.Int) *big.Int {
+		return inp.Add(inp, n)
 	}
 }
 
-func Mul(n int) Operation {
-	return func(inp int) int {
-		return inp * n
+func Mul(n *big.Int) Operation {
+	return func(inp *big.Int) *big.Int {
+		return inp.Mul(inp, n)
 	}
 }
 
 func Square() Operation {
-	return func(inp int) int {
-		return inp * inp
+	return func(inp *big.Int) *big.Int {
+		return inp.Exp(inp, big.NewInt(2), nil)
 	}
 }
 
-func Divide(n int) Operation {
-	return func(inp int) int {
-		return inp / n
+func Divide(n *big.Int) Operation {
+	return func(inp *big.Int) *big.Int {
+		return inp.Div(inp, n)
 	}
 }
 
-type Test func(int) bool
+func Identity() Operation {
+	return func(i *big.Int) *big.Int { return i }
+}
 
-func DivisibleBy(n int) Test {
-	return func(i int) bool {
-		return i%n == 0
+type Test func(*big.Int) bool
+
+func DivisibleBy(n *big.Int) Test {
+	zero := big.NewInt(0)
+	q, m := big.NewInt(0), big.NewInt(0)
+	return func(i *big.Int) bool {
+		q.DivMod(i, n, m)
+		return m.Cmp(zero) == 0
 	}
 }
 
-type Action func(int)
+type Action func(*big.Int)
 
 func Conditional(test Test, whenTrue, whenFalse Action) Action {
-	return func(input int) {
+	return func(input *big.Int) {
 		if test(input) {
 			whenTrue(input)
 		} else {

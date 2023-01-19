@@ -21,9 +21,8 @@ func (ms *MonkeyService) DoBusiness(rounds int) {
 	ids := ms.repo.AllMonkeyIds()
 	for i := 0; i < rounds; i++ {
 		for _, id := range ids {
-			repo.Get(id).DoBusiness()
+			ms.repo.Get(id).DoBusiness()
 		}
-
 	}
 }
 
@@ -38,9 +37,10 @@ func (ms *MonkeyService) MonkeysByActivity() []*Monkey {
 	return monkeys
 }
 
-func NewMonkeyService() *MonkeyService {
+func NewMonkeyService(decoration Operation) *MonkeyService {
+	repo := GetMonkeyRepository()
 	return &MonkeyService{
-		repo:   GetMonkeyRepository(),
-		parser: NewParser(),
+		repo:   repo,
+		parser: NewParser(decoration, repo),
 	}
 }

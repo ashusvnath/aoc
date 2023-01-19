@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"os"
 	"runtime/pprof"
 )
@@ -44,16 +45,28 @@ func main() {
 	}
 
 	log.Printf("Data: %v", string(data))
-	ms := NewMonkeyService()
-	ms.Setup(string(data))
-	fmt.Printf("Part1: %v\n", Part1(ms))
+	fmt.Printf("Part1: %v\n", Part1(string(data)))
+	fmt.Printf("Part2: %v\n", Part2(string(data)))
 }
 
-func Part1(ms *MonkeyService) int {
+func Part1(data string) int {
+	ms := NewMonkeyService(Divide(big.NewInt(3)))
+	ms.Setup(string(data))
 	ms.DoBusiness(20)
 	monkeys := ms.MonkeysByActivity()
-	log.Printf("ids sorted by activity : %v", monkeys)
-	repo = GetMonkeyRepository()
+	log.Printf("Part1: sorted by activity : %v", monkeys)
+
+	result := monkeys[0].Activity() * monkeys[1].Activity()
+	return result
+}
+
+func Part2(data string) int {
+	ms := NewMonkeyService(nil)
+	ms.Setup(string(data))
+	ms.DoBusiness(10000)
+	monkeys := ms.MonkeysByActivity()
+	log.Printf("Part2: sorted by activity : %v", monkeys)
+
 	result := monkeys[0].Activity() * monkeys[1].Activity()
 	return result
 }

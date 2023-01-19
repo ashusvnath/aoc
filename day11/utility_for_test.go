@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/big"
 	"runtime"
 	"testing"
 )
@@ -8,6 +9,13 @@ import (
 func assertEqual[T comparable](expected, actual T, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if expected != actual {
+		t.Errorf("\n%s:%d\nExpected : %v\nActual   : %v\n", file, line, expected, actual)
+	}
+}
+
+func assertEqualBigInt(expected, actual *big.Int, t *testing.T) {
+	_, file, line, _ := runtime.Caller(1)
+	if expected.Cmp(actual) != 0 {
 		t.Errorf("\n%s:%d\nExpected : %v\nActual   : %v\n", file, line, expected, actual)
 	}
 }

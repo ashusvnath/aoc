@@ -1,5 +1,7 @@
 package main
 
+import "math/big"
+
 type MonkeyBuilder struct {
 	monkey *Monkey
 	cb     *ConditionalBuilder
@@ -20,7 +22,12 @@ func (mb *MonkeyBuilder) Action(action Action) *MonkeyBuilder {
 	return mb
 }
 
-func (mb *MonkeyBuilder) Items(items ...int) *MonkeyBuilder {
+func (mb *MonkeyBuilder) Divisor(d *big.Int) *MonkeyBuilder {
+	mb.monkey.divisor = d
+	return mb
+}
+
+func (mb *MonkeyBuilder) Items(items ...*big.Int) *MonkeyBuilder {
 	mb.monkey.items = items
 	return mb
 }
@@ -67,4 +74,11 @@ func (cb *ConditionalBuilder) WhenFalse(action Action) *ConditionalBuilder {
 
 func (cb *ConditionalBuilder) Build() Action {
 	return Conditional(cb.test, cb.whenTrue, cb.whenFalse)
+}
+
+func NewMonkeyBuilder(deoration Operation) *MonkeyBuilder {
+	return &MonkeyBuilder{
+		monkey: &Monkey{"unassigned", nil, nil, nil, 0, nil},
+		cb:     &ConditionalBuilder{nil, nil, nil},
+	}
 }
