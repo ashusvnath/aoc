@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"runtime/pprof"
+	"time"
 )
 
 var filepath string
@@ -48,6 +50,7 @@ func main() {
 	pi := Parse(data)
 	pf := NewPathFinder(pi)
 	pf.FindPath(sLen)
-	log.Printf("Path visualized:\n%s", pf.VisualizePath())
+	rand.Seed(time.Now().UnixNano())
+	log.Printf("Path visualized:\n%s", VisualizePath(pf.g, pf.path))
 	fmt.Printf("Part1:length:%d\n", len(pf.path))
 }

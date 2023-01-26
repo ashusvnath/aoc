@@ -4,15 +4,14 @@ import (
 	"log"
 	"math"
 	"math/cmplx"
-	"regexp"
+	"math/rand"
 	"sort"
 )
 
 type PathFinder struct {
-	visited Set[complex128]
-	path    []complex128
-	g       *Grid
-	//knownDistances   map[complex128]int
+	visited          Set[complex128]
+	path             []complex128
+	g                *Grid
 	backtrackedNodes Set[complex128]
 }
 
@@ -55,52 +54,41 @@ func (pf *PathFinder) FindPath(sLen int) {
 	pf.Shorten(sLen)
 }
 
-func (pf *PathFinder) VisualizePath() string {
-	g := pf.g
-	path := make([]complex128, len(pf.path))
-	copy(path, pf.path)
-	path = append(path, g.end)
-	displayData := []rune(string(pf.g.rawData))
-	displayByteMap := map[complex128]rune{
-		-1: '\u2190', 1: '\u2192',
-		-1i: '\u2191', 1i: '\u2193',
-		0: 'E',
-	}
-	for x, idx := range pf.path {
-		nextEntry := path[x+1]
-		d := displayByteMap[nextEntry-idx]
-		if d == 0 {
-			d = '?'
-		}
-		displayIdx := int(imag(idx))*(pf.g.cols+1) + int(real(idx))
-		displayData[displayIdx] = d
-	}
-	return regexp.MustCompile(`[bd-z]`).ReplaceAllString(string(displayData), "·")
-}
-
-func (pf *PathFinder) dist(idx1, idx2 complex128) int {
-	dx := math.Abs(real(idx1 - idx2))
-	dy := math.Abs(imag(idx1 - idx2))
-	v := int(dx + dy)
-	return v
-}
-
 func (pf *PathFinder) rankedNeighbours(idx complex128) []complex128 {
 	g := pf.g
 	currentHeight := g.mat[idx]
 	_n := g.Neighbours(idx)
+	p := cmplx.Phase(g.end - idx)
 	log.Printf("Neighbours: of %v Unranked: %#v", idx, _n)
 	n := pf.filter(_n, currentHeight)
 	sort.Slice(n, func(i, j int) bool {
 		lHeight := pf.g.mat[n[i]]
 		rHeight := pf.g.mat[n[j]]
-		//Rank by height otherwise, taller better
+		//Rank by height, taller better
 		if lHeight > rHeight {
 			return true
 		} else if lHeight < rHeight {
 			return false
 		} else {
-			return pf.dist(n[i], g.end) < pf.dist(n[j], g.end)
+			//When same height, closer to end better
+			ld, lp := cmplx.Polar(g.end - n[i])
+			rd, rp := cmplx.Polar(g.end - n[j])
+			if ld < rd {
+				return true
+			} else if ld > rd {
+				return false
+			} else {
+				dlp := lp - p
+				drp := rp - p
+				log.Printf("Neighbours: Ranking closeness between: %v(%.4f %+.4f%+.4f), %v(%+.4f %+.4f%+.4f) at %v(%+0.4f) to %v", n[i], ld, p, dlp, n[j], rd, p, drp, idx, p, g.end)
+				if math.Abs(dlp) == math.Abs(drp) {
+					randomFlip := rand.Float64() > 0.90
+					log.Printf("Neighbours: Ranking:Choosing by random flip: %v", randomFlip)
+					return randomFlip
+				}
+				log.Printf("Neighbours: Ranking:Choosing by absolute")
+				return math.Abs(dlp) < math.Abs(drp)
+			}
 		}
 	})
 	return n
@@ -132,22 +120,20 @@ func NewPathFinder(g *Grid) *PathFinder {
 
 func (pf *PathFinder) Shorten(shorteningRangeMax int) {
 	log.Println("Shortening: Starting procedure")
-	shortened := true
 	shorteningRange := 3
 	for shorteningRange < shorteningRangeMax {
 		log.Printf("Shortening: looking for segments of length %d", shorteningRange+1)
-		shortened = false
+		shortenedAtLeastOnce := false
 		for i := shorteningRange; i < len(pf.path); i++ {
-			idx1 := pf.path[i-shorteningRange]
-			idx2 := pf.path[i]
-			h1, h2 := pf.g.mat[idx1], pf.g.mat[idx2]
-			hDiff := h1 - h2
-			diff := idx1 - idx2
-			diff = diff * diff
-			if (real(diff) == 0 || imag(diff) == 0) && hDiff == 0 || hDiff == -1 {
-				log.Printf("Shortening: Trying to shorten between %v(%v):%v, %v(%v):%v. ", idx1, i-shorteningRange, h1, idx2, i, h2)
+			segStart := pf.path[i-shorteningRange]
+			segEnd := pf.path[i]
+			hStart, hEnd := pf.g.mat[segStart], pf.g.mat[segEnd]
+			hDiff := hEnd - hStart
+			diff := segEnd - segStart
+			if (real(diff) == 0 || imag(diff) == 0) && (hDiff == 0) {
+				log.Printf("Shortening: Trying to shorten between %v(%v):%v, %v(%v):%v. ", segStart, i-shorteningRange, hStart, segEnd, i, hEnd)
 				oldPathSegment := pf.path[i-shorteningRange : i+1]
-				newPathSegment, shortened := pf.createPath(idx1, idx2)
+				newPathSegment, shortened := pf.createPath(segStart, segEnd, diff, hStart)
 				if shortened && len(oldPathSegment) > len(newPathSegment) {
 					// Before shortening
 					// 0.....i-sR....i......
@@ -159,29 +145,26 @@ func (pf *PathFinder) Shorten(shorteningRangeMax int) {
 					newPath = append(newPath, newPathSegment...)
 					newPath = append(newPath, pf.path[i+1:]...)
 					pf.path = newPath
+					shortenedAtLeastOnce = true
 					log.Printf("Shortening: Restarting loop to shorten segments of size %d", shorteningRange)
 					break
 				}
 			}
 		}
-		if !shortened {
+		if !shortenedAtLeastOnce {
 			log.Printf("Shortening: Increasing search length!!")
 			shorteningRange++
 		}
 	}
 }
 
-func (pf *PathFinder) createPath(idx1, idx2 complex128) ([]complex128, bool) {
-	connection := []complex128{}
-	h := pf.g.mat[idx1]
-	delta := idx2 - idx1
-	start, end := idx1, idx2
+func (pf *PathFinder) createPath(start, end, delta complex128, h int) ([]complex128, bool) {
+	connection := []complex128{start}
 	d, _ := cmplx.Polar(delta)
 	delta = complex(real(delta)/d, imag(delta)/d)
-	i := 0i
-	log.Printf("Shortening: ]]]]]]]]]]]] : For new path start:%v, end:%v, delta:%v", start, end, delta)
-
-	for i = start; i != end && pf.g.mat[i] == h; i += delta {
+	i := start + delta
+	log.Printf("Shortening: ]]]]]]]]]]]] : Searching start:%v, end:%v, delta:%v", start, end, delta)
+	for ; i != end && pf.g.mat[i] == h; i += delta {
 		connection = append(connection, i)
 	}
 	if i != end {
