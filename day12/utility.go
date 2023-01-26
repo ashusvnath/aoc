@@ -41,3 +41,42 @@ func (o *Observable[T]) Notify() {
 		notify(o.observed)
 	}
 }
+
+type Queue[T any] []T
+
+func (q *Queue[T]) Push(elem T) {
+	typedQ := Queue[T](append([]T(*q), elem))
+	q = &typedQ
+}
+
+func (q *Queue[T]) Pop() T {
+	if len(*q) == 0 {
+		return *new(T)
+	}
+	typedQ := []T(*q)
+	result := typedQ[0]
+	typedQ = typedQ[1:]
+	newQ := Queue[T](typedQ)
+	q = &newQ
+	return result
+}
+
+func (q *Queue[T]) Len() int {
+	return len(*q)
+}
+
+func (q *Queue[T]) IsEmpty() bool {
+	return len(*q) == 0
+}
+
+func NewQueue[T any]() *Queue[T] {
+	newQ := make([]T, 0)
+	q := Queue[T](newQ)
+	return &q
+}
+
+func NewQueueN[T any](n int) *Queue[T] {
+	newQ := make([]T, n)
+	q := Queue[T](newQ)
+	return &q
+}

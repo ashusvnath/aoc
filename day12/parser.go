@@ -2,74 +2,66 @@ package main
 
 import "strings"
 
-type ParsedInput struct {
+type Grid struct {
 	rawData      []byte
-	mat          [][]int
-	idxsByHeight map[int]*Set[int]
-	start, end   int
+	mat          map[complex128]int
+	idxsByHeight map[int]*Set[complex128]
+	start, end   complex128
 	rows, cols   int
 }
 
-func (pi *ParsedInput) GetByIdx(idx int) int {
-	row := idx / pi.cols
-	col := idx % pi.cols
-	return pi.mat[row][col]
-}
-
-func (pi *ParsedInput) GetByRC(r, c int) int {
-	return pi.mat[r][c]
-}
-
-func (pi *ParsedInput) Neighbours(idx int) []int {
-	row := idx / pi.cols
-	col := idx % pi.cols
-	neighbours := [][2]int{{row + 1, col}, {row - 1, col}, {row, col + 1}, {row, col - 1}}
-	result := []int{}
-	for _, rc := range neighbours {
-		row, col := rc[0], rc[1]
-		if row < 0 || col < 0 || row >= pi.rows || col >= pi.cols {
+func (g *Grid) Neighbours(in complex128) []complex128 {
+	neighbours := []complex128{in + 1i, in - 1i, in + 1, in - 1}
+	result := []complex128{}
+	for _, gp := range neighbours {
+		c, r := int(real(gp)), int(imag(gp))
+		if r < 0 || c < 0 || r >= g.rows || c >= g.cols {
 			continue
 		}
-		result = append(result, row*pi.cols+col)
+		result = append(result, gp)
 	}
 	return result
 }
 
-func Parse(data []byte) *ParsedInput {
-	lines := strings.Split(strings.TrimSuffix(string(data), "\n"), "\n")
-	l := len(lines)
-	matrix := make([][]int, l)
-	start, end := -1, -1
-	idxsByHeight := make(map[int]*Set[int])
-	for row, lineString := range lines {
-		matrix[row] = make([]int, len(lineString))
-		for col, c := range lineString {
-			height := int(c) - 'a'
-			idx := row*(len(lineString)) + col
-			if height == -14 {
-				start = idx
-				height = 0
-			}
-			if height == -28 {
-				end = idx
-				height = 25
-			}
-			matrix[row][col] = height
-			if idxsByHeight[height] == nil {
-				s := make(Set[int])
-				idxsByHeight[height] = &s
-			}
-			idxsByHeight[height].Add(idx)
+func Parse(data []byte) *Grid {
+	input := strings.TrimSuffix(string(data), "\n")
+	start, end := -1i, -1i
+	idxsByHeight := make(map[int]*Set[complex128])
+	matrix := make(map[complex128]int)
+	linesSeen := 0
+	gp := 0i
+	for _, c := range input {
+		height := int(c) - 'a'
+		if c == 'S' {
+			start = gp
+			height = 0
 		}
+		if c == 'E' {
+			end = gp
+			height = 25
+		}
+		if c == '\n' {
+			gp = complex(0, imag(gp)+1)
+			linesSeen += 1
+			continue
+		}
+
+		matrix[gp] = height
+		if idxsByHeight[height] == nil {
+			s := make(Set[complex128])
+			idxsByHeight[height] = &s
+		}
+		idxsByHeight[height].Add(gp)
+		gp += 1
 	}
-	pi := &ParsedInput{
+	pi := &Grid{
 		rawData:      data,
 		mat:          matrix,
 		idxsByHeight: idxsByHeight,
 		start:        start,
 		end:          end,
-		rows:         len(matrix),
-		cols:         len(matrix[0]),
+		rows:         linesSeen + 1,
+		cols:         int(real(gp)),
 	}
 	return pi
 }

@@ -29,6 +29,8 @@ func readFile(filepath string) []byte {
 }
 
 func main() {
+	var sLen int
+	flag.IntVar(&sLen, "l", 10, "number of segment shortenings")
 	flag.Parse()
 	if !verbose {
 		log.SetOutput(io.Discard)
@@ -45,7 +47,7 @@ func main() {
 	}
 	pi := Parse(data)
 	pf := NewPathFinder(pi)
-	pf.FindPath()
+	pf.FindPath(sLen)
 	//log.Printf("Path: %#v", pf.path)
 	log.Printf("Path visualized:\n%s", pf.VisualizePath())
 	fmt.Printf("Part1:length:%d\n", len(pf.path))

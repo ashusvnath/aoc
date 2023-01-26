@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+//lint:ignore U1000 this is a utility
 func assertEqual[T comparable](expected, actual T, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if expected != actual {
