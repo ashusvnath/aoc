@@ -12,6 +12,7 @@ func assertEqual[T comparable](expected, actual T, t *testing.T) {
 	}
 }
 
+//lint:ignore U1000 this is a utility
 func assertTrue(in bool, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if !in {
@@ -19,6 +20,7 @@ func assertTrue(in bool, t *testing.T) {
 	}
 }
 
+//lint:ignore U1000 this is a utility
 func assertFalse(in bool, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if in {

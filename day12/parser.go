@@ -5,7 +5,7 @@ import "strings"
 type ParsedInput struct {
 	rawData      []byte
 	mat          [][]int
-	idxsByHeight map[int][]int
+	idxsByHeight map[int]*Set[int]
 	start, end   int
 	rows, cols   int
 }
@@ -30,7 +30,7 @@ func (pi *ParsedInput) Neighbours(idx int) []int {
 		if row < 0 || col < 0 || row >= pi.rows || col >= pi.cols {
 			continue
 		}
-		result = append(result, row*pi.rows+col)
+		result = append(result, row*pi.cols+col)
 	}
 	return result
 }
@@ -40,20 +40,26 @@ func Parse(data []byte) *ParsedInput {
 	l := len(lines)
 	matrix := make([][]int, l)
 	start, end := -1, -1
-	idxsByHeight := make(map[int][]int)
+	idxsByHeight := make(map[int]*Set[int])
 	for row, lineString := range lines {
 		matrix[row] = make([]int, len(lineString))
 		for col, c := range lineString {
 			height := int(c) - 'a'
-			matrix[row][col] = height
 			idx := row*(len(lineString)) + col
 			if height == -14 {
 				start = idx
+				height = 0
 			}
 			if height == -28 {
 				end = idx
+				height = 25
 			}
-			idxsByHeight[height] = append(idxsByHeight[height], idx)
+			matrix[row][col] = height
+			if idxsByHeight[height] == nil {
+				s := make(Set[int])
+				idxsByHeight[height] = &s
+			}
+			idxsByHeight[height].Add(idx)
 		}
 	}
 	pi := &ParsedInput{

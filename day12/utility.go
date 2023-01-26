@@ -21,6 +21,10 @@ func (s *Set[T]) AsSlice() []T {
 	return result
 }
 
+func NewSet[T comparable]() Set[T] {
+	return make(map[T]bool)
+}
+
 type Notifiable[T any] func(T)
 
 type Observable[T any] struct {

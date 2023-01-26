@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -43,5 +44,9 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	pi := Parse(data)
-	log.Printf("Data:\n%#v", pi)
+	pf := NewPathFinder(pi)
+	pf.FindPath()
+	//log.Printf("Path: %#v", pf.path)
+	log.Printf("Path visualized:\n%s", pf.VisualizePath())
+	fmt.Printf("Part1:length:%d\n", len(pf.path))
 }
