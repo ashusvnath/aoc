@@ -115,7 +115,7 @@ func (pf *PathFinder) filter(in []complex128, h int) []complex128 {
 		}
 		result = append(result, idx)
 	}
-	log.Printf("Nieghbours: Filtered neigbhours %#v", result)
+	log.Printf("Neighbours: Filtered: %#v", result)
 	return result
 }
 
@@ -131,11 +131,11 @@ func NewPathFinder(g *Grid) *PathFinder {
 }
 
 func (pf *PathFinder) Shorten(shorteningRangeMax int) {
-	log.Println("Shortening: ]]]]]]]]]]]] Starting shortening procedure")
+	log.Println("Shortening: Starting procedure")
 	shortened := true
 	shorteningRange := 3
 	for shorteningRange < shorteningRangeMax {
-		log.Printf("Shortening: ]]]]]]]]]]]] shortening segments of length %d", shorteningRange+1)
+		log.Printf("Shortening: looking for segments of length %d", shorteningRange+1)
 		shortened = false
 		for i := shorteningRange; i < len(pf.path); i++ {
 			idx1 := pf.path[i-shorteningRange]
@@ -144,8 +144,8 @@ func (pf *PathFinder) Shorten(shorteningRangeMax int) {
 			hDiff := h1 - h2
 			diff := idx1 - idx2
 			diff = diff * diff
-			if (real(diff) == 0 || imag(diff) == 0) && hDiff == 0 {
-				log.Printf("Shortening: ]]]]]]]]]]]] Trying to shorten between %v(%v):%v, %v(%v):%v. ", idx1, i-shorteningRange, h1, idx2, i, h2)
+			if (real(diff) == 0 || imag(diff) == 0) && hDiff == 0 || hDiff == -1 {
+				log.Printf("Shortening: Trying to shorten between %v(%v):%v, %v(%v):%v. ", idx1, i-shorteningRange, h1, idx2, i, h2)
 				oldPathSegment := pf.path[i-shorteningRange : i+1]
 				newPathSegment, shortened := pf.createPath(idx1, idx2)
 				if shortened && len(oldPathSegment) > len(newPathSegment) {
@@ -153,19 +153,19 @@ func (pf *PathFinder) Shorten(shorteningRangeMax int) {
 					// 0.....i-sR....i......
 					// After shortening
 					// 0.....i-sR-1,newSeg,i+1........
-					log.Printf("Shortening: ]]]]]]]]]]]] old path:%#v ", oldPathSegment)
-					log.Printf("Shortening: ]]]]]]]]]]]] new Path: %#v", newPathSegment)
+					log.Printf("Shortening: old path:%#v ", oldPathSegment)
+					log.Printf("Shortening: new Path: %#v", newPathSegment)
 					newPath := append([]complex128{}, pf.path[:i-shorteningRange]...)
 					newPath = append(newPath, newPathSegment...)
 					newPath = append(newPath, pf.path[i+1:]...)
 					pf.path = newPath
-					log.Printf("Shortening: ]]]]]]]]]] Restarting loop to shorten segments of size %d", shorteningRange)
+					log.Printf("Shortening: Restarting loop to shorten segments of size %d", shorteningRange)
 					break
 				}
 			}
 		}
 		if !shortened {
-			log.Printf("Shortening: ]]]]]]]]]]]] Increasing search length!!")
+			log.Printf("Shortening: Increasing search length!!")
 			shorteningRange++
 		}
 	}

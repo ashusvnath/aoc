@@ -48,7 +48,6 @@ func main() {
 	pi := Parse(data)
 	pf := NewPathFinder(pi)
 	pf.FindPath(sLen)
-	//log.Printf("Path: %#v", pf.path)
 	log.Printf("Path visualized:\n%s", pf.VisualizePath())
 	fmt.Printf("Part1:length:%d\n", len(pf.path))
 }
