@@ -1,28 +1,34 @@
 package main
 
-type Set[T comparable] map[T]bool
+type Set[T comparable] struct {
+	s map[T]bool
+}
 
 func (s *Set[T]) Contains(val T) bool {
-	_, ok := (*s)[val]
+	_, ok := (s.s)[val]
 	return ok
 }
 
 func (s *Set[T]) Add(elem T) {
-	(*s)[elem] = true
+	s.s[elem] = true
 }
 
 func (s *Set[T]) AsSlice() []T {
-	result := make([]T, len(*s))
+	result := make([]T, len(s.s))
 	idx := 0
-	for k := range *s {
+	for k := range s.s {
 		result[idx] = k
 		idx++
 	}
 	return result
 }
 
-func NewSet[T comparable]() Set[T] {
-	return make(map[T]bool)
+func (s *Set[T]) Len() int {
+	return len(s.s)
+}
+
+func NewSet[T comparable]() *Set[T] {
+	return &Set[T]{make(map[T]bool)}
 }
 
 type Notifiable[T any] func(T)
@@ -42,41 +48,39 @@ func (o *Observable[T]) Notify() {
 	}
 }
 
-type Queue[T any] []T
+type Queue[T any] struct {
+	q []T
+}
 
 func (q *Queue[T]) Push(elem T) {
-	typedQ := Queue[T](append([]T(*q), elem))
-	q = &typedQ
+	q.q = append(q.q, elem)
 }
 
 func (q *Queue[T]) Pop() T {
-	if len(*q) == 0 {
+	if len(q.q) == 0 {
 		return *new(T)
 	}
-	typedQ := []T(*q)
-	result := typedQ[0]
-	typedQ = typedQ[1:]
-	newQ := Queue[T](typedQ)
-	q = &newQ
+	result := q.q[0]
+	q.q = q.q[1:]
 	return result
 }
 
 func (q *Queue[T]) Len() int {
-	return len(*q)
+	return len(q.q)
 }
 
 func (q *Queue[T]) IsEmpty() bool {
-	return len(*q) == 0
+	return len(q.q) == 0
+}
+
+func (q *Queue[T]) Clear() {
+	q.q = []T{}
 }
 
 func NewQueue[T any]() *Queue[T] {
-	newQ := make([]T, 0)
-	q := Queue[T](newQ)
-	return &q
+	return &Queue[T]{}
 }
 
 func NewQueueN[T any](n int) *Queue[T] {
-	newQ := make([]T, n)
-	q := Queue[T](newQ)
-	return &q
+	return &Queue[T]{make([]T, n)}
 }

@@ -31,8 +31,6 @@ func readFile(filepath string) []byte {
 }
 
 func main() {
-	var sLen int
-	flag.IntVar(&sLen, "l", 10, "number of segment shortenings")
 	flag.Parse()
 	if !verbose {
 		log.SetOutput(io.Discard)
@@ -47,10 +45,14 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	pi := Parse(data)
-	pf := NewPathFinder(pi)
-	pf.FindPath(sLen)
+	g := Parse(data)
+	pf := NewPathFinder(g)
+	path := pf.FindPath(g.start)
 	rand.Seed(time.Now().UnixNano())
-	log.Printf("Path visualized:\n%s", VisualizePath(pf.g, pf.path))
-	fmt.Printf("Part1:length:%d\n", len(pf.path))
+	log.Printf("Path visualized:\n%s", VisualizePath(g, path.path, path.Start()))
+	fmt.Printf("Part1:length:%d\n", path.Len())
+	trail := pf.HikingTrail(path)
+	log.Printf("Searched %d starting points", g.idxsByHeight[0].Len())
+	log.Printf("Shortest trail visualized:\n%s", VisualizePath(g, trail.path, trail.Start()))
+	fmt.Printf("Part2:length:%d\n", trail.Len())
 }

@@ -7,6 +7,7 @@ all : clean build tests
 clean:
 	@echo Cleaning targets
 	@rm -f $(NAME).out
+	go clean -x
 	@echo DONE
 
 unit:

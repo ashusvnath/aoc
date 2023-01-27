@@ -28,9 +28,6 @@ func (g *Grid) Neighbours(in complex128) []complex128 {
 		}
 		result = append(result, gp)
 	}
-	// rand.Shuffle(len(result), func(i, j int) {
-	// 	result[i], result[j] = result[j], result[i]
-	// })
 	g.knownNeighbours[in] = result
 	return result
 }
@@ -60,8 +57,7 @@ func Parse(data []byte) *Grid {
 
 		matrix[gp] = height
 		if idxsByHeight[height] == nil {
-			s := make(Set[complex128])
-			idxsByHeight[height] = &s
+			idxsByHeight[height] = NewSet[complex128]()
 		}
 		idxsByHeight[height].Add(gp)
 		gp += 1
