@@ -71,8 +71,10 @@ func (pf *PathFinder) rankedNeighbours(idx complex128) []complex128 {
 			return false
 		} else {
 			//When same height, closer to end better
-			ld, lp := cmplx.Polar(g.end - n[i])
-			rd, rp := cmplx.Polar(g.end - n[j])
+			lDiff := g.end - n[i]
+			rDiff := g.end - n[j]
+			ld, lp := cmplx.Polar(lDiff)
+			rd, rp := cmplx.Polar(rDiff)
 			if ld < rd {
 				return true
 			} else if ld > rd {
@@ -82,7 +84,7 @@ func (pf *PathFinder) rankedNeighbours(idx complex128) []complex128 {
 				drp := rp - p
 				log.Printf("Neighbours: Ranking closeness between: %v(%.4f %+.4f%+.4f), %v(%+.4f %+.4f%+.4f) at %v(%+0.4f) to %v", n[i], ld, p, dlp, n[j], rd, p, drp, idx, p, g.end)
 				if math.Abs(dlp) == math.Abs(drp) {
-					randomFlip := rand.Float64() > 0.90
+					randomFlip := rand.Float64() > 0.10
 					log.Printf("Neighbours: Ranking:Choosing by random flip: %v", randomFlip)
 					return randomFlip
 				}
@@ -112,9 +114,7 @@ func NewPathFinder(g *Grid) *PathFinder {
 		visited: make(Set[complex128]),
 		path:    []complex128{},
 		g:       g,
-		//knownDistances:   make(map[int]int),
 		backtrackedNodes: make(Set[complex128]),
-		//queue:            NewQueue[int](),
 	}
 }
 

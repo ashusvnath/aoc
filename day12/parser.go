@@ -1,18 +1,26 @@
 package main
 
-import "strings"
+import (
+	"strings"
+)
 
 type Grid struct {
-	rawData      []byte
-	mat          map[complex128]int
-	idxsByHeight map[int]*Set[complex128]
-	start, end   complex128
-	rows, cols   int
+	rawData         []byte
+	mat             map[complex128]int
+	idxsByHeight    map[int]*Set[complex128]
+	start, end      complex128
+	rows, cols      int
+	knownNeighbours map[complex128][]complex128
 }
 
 func (g *Grid) Neighbours(in complex128) []complex128 {
 	neighbours := []complex128{in + 1i, in - 1i, in + 1, in - 1}
-	result := []complex128{}
+	result := g.knownNeighbours[in]
+	if result != nil {
+		return result
+	}
+
+	result = []complex128{}
 	for _, gp := range neighbours {
 		c, r := int(real(gp)), int(imag(gp))
 		if r < 0 || c < 0 || r >= g.rows || c >= g.cols {
@@ -20,6 +28,10 @@ func (g *Grid) Neighbours(in complex128) []complex128 {
 		}
 		result = append(result, gp)
 	}
+	// rand.Shuffle(len(result), func(i, j int) {
+	// 	result[i], result[j] = result[j], result[i]
+	// })
+	g.knownNeighbours[in] = result
 	return result
 }
 
@@ -55,13 +67,14 @@ func Parse(data []byte) *Grid {
 		gp += 1
 	}
 	pi := &Grid{
-		rawData:      data,
-		mat:          matrix,
-		idxsByHeight: idxsByHeight,
-		start:        start,
-		end:          end,
-		rows:         linesSeen + 1,
-		cols:         int(real(gp)),
+		rawData:         data,
+		mat:             matrix,
+		idxsByHeight:    idxsByHeight,
+		start:           start,
+		end:             end,
+		rows:            linesSeen + 1,
+		cols:            int(real(gp)),
+		knownNeighbours: make(map[complex128][]complex128),
 	}
 	return pi
 }
