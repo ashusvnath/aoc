@@ -1,4 +1,4 @@
-package main
+package models
 
 type Path struct {
 	path       []complex128
@@ -16,6 +16,14 @@ func NewPath(g *Grid, start complex128) *Path {
 	}
 }
 
+func (p *Path) GetLocations() []complex128 {
+	return p.path
+}
+
+func (p *Path) CurrentLocation() complex128 {
+	return p.currentIdx
+}
+
 func (p *Path) Len() int {
 	return p.len
 }
@@ -24,7 +32,7 @@ func (p *Path) Start() complex128 {
 	return p.start
 }
 
-func (p *Path) Add(idx complex128) *Path {
+func (p *Path) Append(idx complex128) *Path {
 	newPath := append([]complex128{}, p.path...)
 	newPath = append(newPath, idx)
 	return &Path{

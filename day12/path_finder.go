@@ -1,33 +1,35 @@
 package main
 
 import (
+	. "day12/models"
+	. "day12/utility"
 	"log"
 )
 
 type PathFinder struct {
-	q *Queue[*Path]
+	q Queue[*Path]
 	g *Grid
 }
 
 func (pf *PathFinder) FindPath(start complex128) *Path {
 	g := pf.g
-	pf.q.Push(NewPath(g, start))
+	pf.q.Enqueue(NewPath(g, start))
 	visited := NewSet[complex128]()
 	dropped := 0
-	for !pf.q.IsEmpty() {
-		path := pf.q.Pop()
-		currentIdx := path.currentIdx
-		if currentIdx == g.end {
+	for pf.q.Len() > 0 {
+		path := pf.q.Dequeue()
+		currentIdx := path.CurrentLocation()
+		if currentIdx == g.End() {
 			log.Printf("Path found for %v: len: %d", start, path.Len())
 			pf.q.Clear()
 			return path
 		}
 		neighbours := g.Neighbours(currentIdx)
 		for _, n := range neighbours {
-			if !visited.Contains(n) && g.mat[n]-g.mat[path.currentIdx] <= 1 {
-				newPath := path.Add(n)
+			if !visited.Contains(n) && g.HeightAt(n)-g.HeightAt(path.CurrentLocation()) <= 1 {
+				newPath := path.Append(n)
 				visited.Add(n)
-				pf.q.Push(newPath)
+				pf.q.Enqueue(newPath)
 			} else {
 				dropped++
 			}
@@ -38,12 +40,12 @@ func (pf *PathFinder) FindPath(start complex128) *Path {
 	return nil
 }
 
-func (pf *PathFinder) HikingTrail(startTrail *Path) *Path {
+func (pf *PathFinder) FindHikingTrail(startTrail *Path) *Path {
 	trail := *startTrail
-	starts := pf.g.idxsByHeight[0].AsSlice()
-	log.Printf("Searching %d starting points for shortest", len(starts))
+	starts := pf.g.GetLocationsAtHeight(0).AsSlice()
+	log.Printf("Searching %d starting points for shortest path to peak", len(starts))
 	for _, idx := range starts {
-		if idx == pf.g.start {
+		if idx == pf.g.Start() {
 			continue
 		}
 		path := pf.FindPath(idx)

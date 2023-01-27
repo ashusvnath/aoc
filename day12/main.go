@@ -9,6 +9,8 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
+
+	"day12/models"
 )
 
 var filepath string
@@ -45,14 +47,14 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	g := Parse(data)
+	g := models.ParseGrid(data)
 	pf := NewPathFinder(g)
-	path := pf.FindPath(g.start)
+	path := pf.FindPath(g.Start())
 	rand.Seed(time.Now().UnixNano())
-	log.Printf("Path visualized:\n%s", VisualizePath(g, path.path, path.Start()))
+	log.Printf("Path visualized:\n%s", VisualizePath(g, path.GetLocations(), path.Start()))
 	fmt.Printf("Part1:length:%d\n", path.Len())
-	trail := pf.HikingTrail(path)
-	log.Printf("Searched %d starting points", g.idxsByHeight[0].Len())
-	log.Printf("Shortest trail visualized:\n%s", VisualizePath(g, trail.path, trail.Start()))
+	trail := pf.FindHikingTrail(path)
+	log.Printf("Searched %d starting points", g.GetLocationsAtHeight(0).Len())
+	log.Printf("Shortest trail visualized:\n%s", VisualizePath(g, trail.GetLocations(), trail.Start()))
 	fmt.Printf("Part2:length:%d\n", trail.Len())
 }

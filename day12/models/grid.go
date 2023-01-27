@@ -1,20 +1,49 @@
-package main
+package models
 
 import (
+	"day12/utility"
 	"strings"
 )
 
 type Grid struct {
 	rawData         []byte
 	mat             map[complex128]int
-	idxsByHeight    map[int]*Set[complex128]
+	idxsByHeight    map[int]*utility.Set[complex128]
 	start, end      complex128
 	rows, cols      int
 	knownNeighbours map[complex128][]complex128
 }
 
+func (g *Grid) End() complex128 {
+	return g.end
+}
+
+func (g *Grid) Start() complex128 {
+	return g.start
+}
+
+func (g *Grid) Columns() int {
+	return g.cols
+}
+
+func (g *Grid) RawData() []byte {
+	return g.rawData
+}
+
+func (g *Grid) HeightAt(location complex128) int {
+	h, found := g.mat[location]
+	if found {
+		return h
+	}
+	return -1
+}
+
+func (g *Grid) GetLocationsAtHeight(height int) *utility.Set[complex128] {
+	return g.idxsByHeight[height]
+}
+
 func (g *Grid) Neighbours(in complex128) []complex128 {
-	neighbours := []complex128{in + 1i, in - 1i, in + 1, in - 1}
+	neighbours := []complex128{in + 1, in + 1i, in - 1, in - 1i}
 	result := g.knownNeighbours[in]
 	if result != nil {
 		return result
@@ -32,10 +61,10 @@ func (g *Grid) Neighbours(in complex128) []complex128 {
 	return result
 }
 
-func Parse(data []byte) *Grid {
+func ParseGrid(data []byte) *Grid {
 	input := strings.TrimSuffix(string(data), "\n")
 	start, end := -1i, -1i
-	idxsByHeight := make(map[int]*Set[complex128])
+	idxsByHeight := make(map[int]*utility.Set[complex128])
 	matrix := make(map[complex128]int)
 	linesSeen := 0
 	gp := 0i
@@ -57,7 +86,7 @@ func Parse(data []byte) *Grid {
 
 		matrix[gp] = height
 		if idxsByHeight[height] == nil {
-			idxsByHeight[height] = NewSet[complex128]()
+			idxsByHeight[height] = utility.NewSet[complex128]()
 		}
 		idxsByHeight[height].Add(gp)
 		gp += 1
