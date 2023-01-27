@@ -1,3 +1,3 @@
-module day<CHANGEME>
+module <CHANGEME> 
 
 go 1.18
