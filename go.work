@@ -5,7 +5,9 @@ use (
 	./day11
 	./day12
 	./day13
+	./day14
 	./day7
 	./day8
 	./day9
+	./skel
 )

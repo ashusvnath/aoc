@@ -1,7 +1,7 @@
 package main
 
 import (
-	"daynn/assert"
+	"day14/assert"
 	"testing"
 )
 

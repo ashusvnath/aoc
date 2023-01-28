@@ -1,4 +1,4 @@
-package utility
+package assert
 
 import (
 	"runtime"
@@ -6,7 +6,7 @@ import (
 )
 
 //lint:ignore U1000 this is a utility
-func AssertEqual[T comparable](expected, actual T, t *testing.T) {
+func Equal[T comparable](expected, actual T, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if expected != actual {
 		t.Errorf("\n%s:%d\nExpected : %v\nActual   : %v\n", file, line, expected, actual)
@@ -14,7 +14,7 @@ func AssertEqual[T comparable](expected, actual T, t *testing.T) {
 }
 
 //lint:ignore U1000 this is a utility
-func AssertTrue(in bool, t *testing.T) {
+func True(in bool, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if !in {
 		t.Errorf("\n%s:%d\nExpected : %v to be true", file, line, in)
@@ -22,7 +22,7 @@ func AssertTrue(in bool, t *testing.T) {
 }
 
 //lint:ignore U1000 this is a utility
-func AssertFalse(in bool, t *testing.T) {
+func False(in bool, t *testing.T) {
 	_, file, line, _ := runtime.Caller(1)
 	if in {
 		t.Errorf("%s:%d\nExpected : %v to be false", file, line, in)

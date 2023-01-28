@@ -12,7 +12,7 @@ clean:
 
 unit:
 	@echo Running unit tests
-	@go test -tags testing -v ./...
+	@go test -v ./...
 	@echo DONE
 
 build : *.go unit
