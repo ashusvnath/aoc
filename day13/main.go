@@ -1,7 +1,10 @@
 package main
 
 import (
+	"day13/models"
+	"day13/parser"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -43,4 +46,19 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	log.Printf("Data:\n%v", string(data))
+	pairs := parser.ParsePairs(string(data))
+	fmt.Printf("Part1: %d\n", Part1(pairs))
+
+}
+
+func Part1(pairs []*models.Pair) int {
+	sum := 0
+	for idx, pair := range pairs {
+		log.Printf("=== Pair %d ===", idx+1)
+		if pair.IsOrderedCorrectly() {
+			log.Printf("Pair at idx %d is ordered correctly", idx+1)
+			sum += (idx + 1)
+		}
+	}
+	return sum
 }
