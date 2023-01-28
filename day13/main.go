@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"sort"
 )
 
 var filepath string
@@ -46,8 +47,9 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	log.Printf("Data:\n%v", string(data))
-	pairs := parser.ParsePairs(string(data))
+	pairs, allPackets := parser.ParsePairs(string(data))
 	fmt.Printf("Part1: %d\n", Part1(pairs))
+	fmt.Printf("Part2: %d\n", Part2(allPackets))
 
 }
 
@@ -61,4 +63,20 @@ func Part1(pairs []*models.Pair) int {
 		}
 	}
 	return sum
+}
+
+func Part2(packets []models.List) int {
+	divider2 := models.List{models.List{models.Int(2)}}
+	divider6 := models.List{models.List{models.Int(6)}}
+	packets = append(packets, divider2, divider6)
+	sort.Slice(packets, func(left, right int) bool {
+		return packets[left].Compare(packets[right]) == models.Less
+	})
+	result := 1
+	for idx, p := range packets {
+		if p.Compare(divider2) == models.Equal || p.Compare(divider6) == models.Equal {
+			result *= (idx + 1)
+		}
+	}
+	return result
 }

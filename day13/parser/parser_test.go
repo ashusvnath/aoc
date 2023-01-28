@@ -56,7 +56,7 @@ func TestParsePairs(t *testing.T) {
 		expectedRight := List{Int(4), List{}, List{}, Int(5), Int(6)}
 		expected0 := NewPair(expectedLeft, expectedRight)
 		expected1 := NewPair(List{}, List{Int(9)})
-		actual := ParsePairs(input)
+		actual, _ := ParsePairs(input)
 
 		assert.Equal(2, len(actual), t)
 		assert.True(expected0.Equal(actual[0]), t)

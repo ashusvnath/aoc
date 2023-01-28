@@ -48,13 +48,17 @@ func Parse(input string) List {
 	return currentList
 }
 
-func ParsePairs(input string) []*Pair {
+func ParsePairs(input string) ([]*Pair, []List) {
 	pairs := []*Pair{}
+	allPackets := []List{}
 	pairStrings := strings.Split(strings.TrimRight(input, "\n"), "\n\n")
 	for _, pairString := range pairStrings {
 		temp := strings.Split(pairString, "\n")
-		pair := NewPair(Parse(temp[0]), Parse(temp[1]))
+		leftPacket := Parse(temp[0])
+		rightPacket := Parse(temp[1])
+		pair := NewPair(leftPacket, rightPacket)
 		pairs = append(pairs, pair)
+		allPackets = append(allPackets, leftPacket, rightPacket)
 	}
-	return pairs
+	return pairs, allPackets
 }
