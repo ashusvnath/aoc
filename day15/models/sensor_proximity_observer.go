@@ -22,7 +22,8 @@ func (s SensorProximityObserverForY) Listen(sensor *Sensor) {
 	distanceToSensor := math.Abs(imag(sensorLocation) - s.target)
 	sensorX := real(sensorLocation)
 	xRange := sensor.closestBeaconDistance - distanceToSensor
-	log.Printf("Sensor at %4v is %2.0f units away from closest sensor and %2.0f units from line y=%2.0f", sensorLocation, sensor.closestBeaconDistance, distanceToSensor, s.target)
+	log.Printf("Sensor at %4v is %2.0f units away from closest sensor and %2.0f units from line y=%2.0f",
+		sensorLocation, sensor.closestBeaconDistance, distanceToSensor, s.target)
 	if imag(sensor.closestBeaconLocation) == s.target {
 		s.forbiddenBeaconLocations.Remove(sensor.closestBeaconLocation)
 		log.Printf("Known beacon locations updated to %d", s.knownBeaconLocations.Len())
