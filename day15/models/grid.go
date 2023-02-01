@@ -1,6 +1,9 @@
 package models
 
-import "day15/utility"
+import (
+	"day15/utility"
+	"log"
+)
 
 type Grid struct {
 	mat map[Location]Object
@@ -21,6 +24,16 @@ func (g *Grid) AddSensor(sensorLocation, beaconLocation Location) {
 
 func (g *Grid) Register(n utility.Notifiable[*Sensor]) {
 	g.obs.Register(n)
+}
+
+func (g *Grid) BeaconPossibleAt(l Location) bool {
+	for _, o := range g.mat {
+		if !o.BeaconPossibleAt(l) {
+			log.Printf("Check for %v failed at %v.", l, o)
+			return false
+		}
+	}
+	return true
 }
 
 func NewGrid() *Grid {

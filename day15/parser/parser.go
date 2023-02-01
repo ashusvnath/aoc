@@ -20,10 +20,12 @@ func ParseLine(input string) (models.Location, models.Location) {
 	return models.Location(complex(sensorX, sensorY)), models.Location(complex(beaconX, beaconY))
 }
 
-func Parse(input string, obs utility.Notifiable[*models.Sensor]) *models.Grid {
+func Parse(input string, obs ...utility.Notifiable[*models.Sensor]) *models.Grid {
 	lines := strings.Split(strings.TrimRight(input, "\n"), "\n")
 	grid := models.NewGrid()
-	grid.Register(obs)
+	for _, o := range obs {
+		grid.Register(o)
+	}
 	for _, line := range lines {
 		sensor, beacon := ParseLine(line)
 		grid.AddSensor(sensor, beacon)

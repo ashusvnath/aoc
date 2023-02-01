@@ -1,22 +1,20 @@
 package models
 
 import (
+	"fmt"
 	"math"
 )
 
 type Location complex128
 
+func (l Location) TuningFrequency() int64 {
+	return int64(real(l)*4000000 + imag(l))
+}
+
 func (l Location) Distance(other Location) float64 {
 	delta := other - l
 	return math.Abs(real(delta)) + math.Abs(imag(delta))
 }
-
-type Type int
-
-const (
-	SENSOR Type = 1
-	BEACON Type = 2
-)
 
 type Sensor struct {
 	location              Location
@@ -24,8 +22,12 @@ type Sensor struct {
 	closestBeaconDistance float64
 }
 
-func (s *Sensor) Type() Type {
-	return SENSOR
+func (s *Sensor) String() string {
+	return fmt.Sprintf("Sensor%v", s.location)
+}
+
+func (s *Sensor) BeaconPossibleAt(l Location) bool {
+	return s.location.Distance(l) > s.closestBeaconDistance
 }
 
 func NewSensor(l, b Location) *Sensor {
@@ -40,8 +42,12 @@ type Beacon struct {
 	l Location
 }
 
-func (b *Beacon) Type() Type {
-	return BEACON
+func (b *Beacon) BeaconPossibleAt(l Location) bool {
+	return b.l != l
+}
+
+func (b *Beacon) String() string {
+	return fmt.Sprintf("Beacon%v", b.l)
 }
 
 func NewBeacon(l Location) *Beacon {
@@ -49,5 +55,5 @@ func NewBeacon(l Location) *Beacon {
 }
 
 type Object interface {
-	Type() Type
+	BeaconPossibleAt(Location) bool
 }

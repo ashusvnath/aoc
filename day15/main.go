@@ -47,8 +47,12 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
+
 	part1 := models.NewSensorProximityObserver(float64(targetY))
-	parser.Parse(string(data), part1.Listen)
+	part2 := models.NewMissingBeaconLocator(float64(2 * targetY))
+	g := parser.Parse(string(data), part1.Listen, part2.Process)
+
 	log.Printf("Data:\n%v", string(data))
 	fmt.Printf("Part1: %d\n", part1.Count())
+	fmt.Printf("Part1: %d\n", part2.Locate(g).TuningFrequency())
 }
