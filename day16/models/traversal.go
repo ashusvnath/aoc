@@ -22,7 +22,7 @@ func (t *Traversal) TotalReleased() int {
 }
 
 func (t *Traversal) AllValvesOpened() bool {
-	return len(t.opened) == RoomsWithNonZeroReleaseRate
+	return len(t.opened) == len(RoomIDsWithNonZeroReleaseRate)
 }
 
 func (t *Traversal) CompleteSteps(n int) {

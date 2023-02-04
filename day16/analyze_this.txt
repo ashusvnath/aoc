@@ -1,0 +1,6 @@
+You open valve DD.	20	2
+You open valve BB.	13	5
+You open valve JJ.	21	9
+You open valve HH.	22	17
+You open valve EE.	3	21
+You open valve CC.	2	24

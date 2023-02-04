@@ -16,8 +16,8 @@ func TestParser(t *testing.T) {
 		assert.Equal("AA", room.Id(), t)
 		assert.Equal(0, room.ReleaseRate(), t)
 		assert.False(room.IsValveOpened(), t)
-		for idx, connectedRoomId := range []string{"DD", "II", "BB"} {
-			assert.Equal(connectedRoomId, room.ConnectedRoomIds()[idx], t)
+		for _, connectedRoomId := range []string{"DD", "II", "BB"} {
+			assert.True(room.ConnectedTo(connectedRoomId), t)
 		}
 	})
 

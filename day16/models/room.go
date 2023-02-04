@@ -1,16 +1,20 @@
 package models
 
-import "fmt"
+import (
+	"day16/utility"
+	"fmt"
+)
 
 type Room struct {
-	id               string
-	releaseRate      int
-	connectedRoomIds []string
-	valveOpened      bool
+	id                  string
+	releaseRate         int
+	connectedRoomIdsSet *utility.Set[string]
+	valveOpened         bool
+	__str               string
 }
 
 func (r *Room) GoString() string {
-	return fmt.Sprintf("Room{Id:%s: Neighbours:(%v)}", r.id, r.connectedRoomIds)
+	return r.__str
 }
 
 func (r *Room) Id() string {
@@ -22,25 +26,37 @@ func (r *Room) ReleaseRate() int {
 }
 
 func (r *Room) ConnectedRoomIds() []string {
-	return r.connectedRoomIds
+	return r.connectedRoomIdsSet.AsSlice()
 }
 
 func (r *Room) IsValveOpened() bool {
 	return r.valveOpened
 }
 
+func (r *Room) ConnectedTo(otherRoomId string) bool {
+	return r.connectedRoomIdsSet.Contains(otherRoomId)
+}
+
 var AllRooms = make(map[string]*Room)
-var RoomsWithNonZeroReleaseRate = 0
+var AllRoomIds = make([]string, 0)
+var RoomIDsWithNonZeroReleaseRate = []string{}
 
 func NewRoom(id string, rate int, connectedRoomIds ...string) *Room {
+	connectedRoomIdsSet := utility.NewSet[string]()
+	for _, id := range connectedRoomIds {
+		connectedRoomIdsSet.Add(id)
+	}
+
+	AllRoomIds = append(AllRoomIds, id)
 	AllRooms[id] = &Room{
-		id:               id,
-		releaseRate:      rate,
-		connectedRoomIds: connectedRoomIds,
-		valveOpened:      false,
+		id:                  id,
+		releaseRate:         rate,
+		connectedRoomIdsSet: connectedRoomIdsSet,
+		valveOpened:         false,
+		__str:               fmt.Sprintf("Room{Id:%s, Neighbours:(%v)}", id, connectedRoomIds),
 	}
 	if rate > 0 {
-		RoomsWithNonZeroReleaseRate++
+		RoomIDsWithNonZeroReleaseRate = append(RoomIDsWithNonZeroReleaseRate, id)
 	}
 	return AllRooms[id]
 }
