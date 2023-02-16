@@ -3,7 +3,9 @@ package main
 import (
 	"day16/models"
 	"day16/parser"
+	"day16/utility"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -48,15 +50,41 @@ func main() {
 	log.Printf("Data:\n%v", string(data))
 	parser.Parse(strings.TrimRight(string(data), "\n"))
 	log.Printf("AllRooms:\n %v", models.AllRooms)
-	lines := strings.Count(strings.TrimRight(string(data), "\n"), "\n") + 1
-	if lines != len(models.AllRoomIds) {
-		log.Fatalf("Something is very very wrong !!. %d, %d", lines, len(models.AllRoomIds))
-	}
+
 	floydWarshallPairDistances := FindAllPairPaths(models.AllRooms)
-	//fmt.Printf("All pair distances: \n%v", floydWarshallPairDistances)
-	//bfs := utility.NewBFS[string]()
-	///Part1(bfs)
-	Part1(floydWarshallPairDistances)
-	// max, path := DFS(bfs, 0, 0, "AA", utility.NewSet[string](), []string{})
-	// fmt.Printf("Max %d. Len: %d, Path: %v", max, len(path), path)
+	pf := NewPathFinder(models.AllRooms, floydWarshallPairDistances)
+	Part1(pf)
+	Part2(pf)
+}
+
+func Part1(pf *PathFinder) {
+	visited := utility.NewSet[string]()
+	pf.SetTimeLimit(30)
+	result, _, err := pf.Search("AA", visited, 30, 0, []string{"AA"}, "man")
+	if err != nil {
+		log.Fatalf("Part1: Error encountered when searching for best path %v", result)
+	}
+	fmt.Printf("Part1: %d, %v\n", result.totalReleased, result.opened)
+	path, _, _ := RenderPath(result.opened, pf, 30)
+	fmt.Printf("%s\n\n", path)
+}
+
+func Part2(pf *PathFinder) {
+	pf.SetTimeLimit(26)
+	result, err := pf.SearchWithCache("AA", 26, "elephant")
+	if err != nil {
+		log.Fatalf("Error when searching for best path with cachedResults: %v", err)
+	}
+
+	path1, released1, timeTaken1 := RenderPath(result[0].opened, pf, 26)
+	path2, released2, timeTaken2 := RenderPath(result[1].opened, pf, 26)
+	totalReleased := released1 + released2
+	timeTaken := -1
+	if timeTaken1 > timeTaken2 {
+		timeTaken = timeTaken1
+	} else {
+		timeTaken = timeTaken2
+	}
+	fmt.Printf("Part2: %v, %v\n", result[0], result[1])
+	fmt.Printf("%s - \n%s\nReleased: %d\nTotalTime taken: %d\n", path1, path2, totalReleased, timeTaken)
 }

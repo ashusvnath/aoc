@@ -27,6 +27,12 @@ func (s *Set[T]) AsSlice() []T {
 	return result
 }
 
+func (s *Set[T]) AddAll(in ...T) {
+	for _, k := range in {
+		s.s[k] = true
+	}
+}
+
 func (s *Set[T]) Len() int {
 	return len(s.s)
 }
