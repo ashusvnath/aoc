@@ -4,7 +4,7 @@ type BFSNeighbourFunction[T any] func(T) []T
 type Pair[T comparable] [2]T
 
 type BFS[T comparable] struct {
-	visited    *Set[T]
+	visited    Set[T]
 	queue      Queue[[]T]
 	knownPaths map[Pair[T]][]T
 }
@@ -49,14 +49,14 @@ func (b *BFS[T]) FindShortestPath(start, end T, neighboursFunc BFSNeighbourFunct
 }
 
 func (b *BFS[T]) Clear() {
-	b.visited = NewSet[T]()
+	b.visited = NewMapSet[T]()
 	b.queue.Clear()
 }
 
 func NewBFS[T comparable]() *BFS[T] {
 	return &BFS[T]{
 		queue:      NewQueue[[]T](),
-		visited:    NewSet[T](),
+		visited:    NewMapSet[T](),
 		knownPaths: make(map[Pair[T]][]T),
 	}
 }

@@ -8,7 +8,7 @@ import (
 type Room struct {
 	id                  string
 	releaseRate         int
-	connectedRoomIdsSet *utility.Set[string]
+	connectedRoomIdsSet utility.Set[string]
 	valveOpened         bool
 	__str               string
 }
@@ -42,7 +42,7 @@ var AllRoomIds = make([]string, 0)
 var RoomIDsWithNonZeroReleaseRate = []string{}
 
 func NewRoom(id string, rate int, connectedRoomIds ...string) *Room {
-	connectedRoomIdsSet := utility.NewSet[string]()
+	connectedRoomIdsSet := utility.NewMapSet[string]()
 	for _, id := range connectedRoomIds {
 		connectedRoomIdsSet.Add(id)
 	}

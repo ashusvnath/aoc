@@ -52,39 +52,23 @@ func main() {
 	log.Printf("AllRooms:\n %v", models.AllRooms)
 
 	floydWarshallPairDistances := FindAllPairPaths(models.AllRooms)
-	pf := NewPathFinder(models.AllRooms, floydWarshallPairDistances)
-	Part1(pf)
-	Part2(pf)
-}
-
-func Part1(pf *PathFinder) {
-	visited := utility.NewSet[string]()
+	bitMask := utility.NewBitmask(models.AllRoomIds)
+	pf := NewPathFinder(models.AllRooms, floydWarshallPairDistances, bitMask)
+	prl := NewParialResultListener(floydWarshallPairDistances, 26, bitMask)
+	pf.SetListener(prl.Listen)
+	visited := utility.NewBitMaskSet(bitMask)
 	pf.SetTimeLimit(30)
 	result, _, err := pf.Search("AA", visited, 30, 0, []string{"AA"}, "man")
+
 	if err != nil {
 		log.Fatalf("Part1: Error encountered when searching for best path %v", result)
 	}
-	fmt.Printf("Part1: %d, %v\n", result.totalReleased, result.opened)
-	path, _, _ := RenderPath(result.opened, pf, 30)
-	fmt.Printf("%s\n\n", path)
-}
+	fmt.Printf("AllRoomUsefulIds: %v, %d\n", models.RoomIDsWithNonZeroReleaseRate, len(models.RoomIDsWithNonZeroReleaseRate))
+	fmt.Printf("Part1: %d, %v, %v\n", result.totalReleased, result.opened, result)
+	//path, _, _ := RenderPath(result.opened, pf, 30)
+	//fmt.Printf("%s\n\n", path)
 
-func Part2(pf *PathFinder) {
-	pf.SetTimeLimit(26)
-	result, err := pf.SearchWithCache("AA", 26, "elephant")
-	if err != nil {
-		log.Fatalf("Error when searching for best path with cachedResults: %v", err)
-	}
-
-	path1, released1, timeTaken1 := RenderPath(result[0].opened, pf, 26)
-	path2, released2, timeTaken2 := RenderPath(result[1].opened, pf, 26)
-	totalReleased := released1 + released2
-	timeTaken := -1
-	if timeTaken1 > timeTaken2 {
-		timeTaken = timeTaken1
-	} else {
-		timeTaken = timeTaken2
-	}
-	fmt.Printf("Part2: %v, %v\n", result[0], result[1])
-	fmt.Printf("%s - \n%s\nReleased: %d\nTotalTime taken: %d\n", path1, path2, totalReleased, timeTaken)
+	fmt.Println("Part2:")
+	results, total := prl.BestResult()
+	fmt.Printf("Total: %d,\n Result1: %v,\n Result2: %v\n", total, results[0], results[1])
 }
